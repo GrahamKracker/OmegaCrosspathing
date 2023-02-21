@@ -555,7 +555,6 @@ public static class Algorithm
             {
                 // Try out a shallow merge
                 return DeepMerge(leftModel, rightModel, history, true);
-
             }
 
             //ModHelper.Msg<UltimateCrosspathingMod>($"Default merge for {leftModel.GetIl2CppType().Name} and {rightModel.GetIl2CppType().Name}");
