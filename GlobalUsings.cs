@@ -7,3 +7,4 @@ global using HarmonyLib;
 global using Il2CppAssets.Scripts.Models.Towers;
 global using Il2CppAssets.Scripts.Models.Towers.Behaviors;
 global using MelonLoader;
+global using OmegaCrosspathing.MergeFixes;

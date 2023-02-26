@@ -16,6 +16,8 @@
     </PropertyGroup>
     <ItemGroup>
         <None Include=".github\workflows\build.yml" />
+        <Compile Remove="MergeFixes\FixAirUnits.cs" />
+        <None Include="MergeFixes\FixAirUnits.cs" />
     </ItemGroup>
     <Import Project="..\btd6.targets" />
 </Project>

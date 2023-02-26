@@ -13,7 +13,6 @@ using Il2CppAssets.Scripts.Models.Towers.Projectiles;
 using Il2CppAssets.Scripts.Models.Towers.Weapons;
 using Il2CppInterop.Runtime;
 using Il2CppSystem.Reflection;
-using OmegaCrosspathing.MergeFixes;
 using Array = Il2CppSystem.Array;
 using Exception = System.Exception;
 using Math = System.Math;
@@ -41,12 +40,14 @@ public static class Algorithm
         MergeField(behaviorsInfo, combined, second);
         
         combined.appliedUpgrades = first.appliedUpgrades.Union(second.appliedUpgrades).ToArray();
-
         
+
         foreach (var postMergeFix in ModContent.GetContent<PostMergeFix>())
         {
             postMergeFix.Apply(combined);
+            postMergeFix.Apply(first, second, ref combined);
         }
+        
         
         return combined;
     }
@@ -451,12 +452,9 @@ public static class Algorithm
             {
                 foreach (var ((name, type), value) in BetterBooleans)
                 {
-                    if (fieldName.Contains(name as string))
+                    if (fieldName.Contains(name as string) && history.GetLeft<Model>().GetIl2CppType().IsSubclassOf(type))
                     {
-                        if (history.GetLeft<Model>().GetIl2CppType().IsSubclassOf(type))
-                        {
-                            return value.ToIl2Cpp();
-                        }
+                        return value.ToIl2Cpp();
                     }
                 }
             }
