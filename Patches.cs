@@ -91,6 +91,8 @@ public partial class Main
                             }
 
                             InGame.instance.AddCash(-totalcost);
+                            TowerSelectionMenu.instance.selectedTower.tower.worth += totalcost;
+                            
                             HideAllSelected();
                             selectedtower = null;
                             Pathsliders[0].SetCurrentValue(0);
@@ -101,6 +103,7 @@ public partial class Main
                             AbilityMenu.instance.AbilitiesChanged();
                             AbilityMenu.instance.TowerChanged(TowerSelectionMenu.instance.selectedTower);
                             AbilityMenu.instance.Update();
+                            
                             TowerSelectionMenu.instance.themeManager.UpdateTheme(TowerSelectionMenu.instance
                                 .selectedTower);
                             TowerSelectionMenu.instance.UpdateTower();
