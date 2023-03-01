@@ -6,6 +6,7 @@ using Il2CppAssets.Scripts.Unity.UI_New.InGame.AbilitiesMenu;
 using Il2CppAssets.Scripts.Unity.UI_New.InGame.TowerSelectionMenu;
 using OmegaCrosspathing.SimulationFixes;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace OmegaCrosspathing;
 
@@ -34,6 +35,10 @@ public partial class Main
         _mainpanel.gameObject.SetActive(true);
         SwitchNormal(false);
     }
+    
+    static HotkeyButton upgradePath1Hotkey = null;
+    static HotkeyButton upgradePath2Hotkey = null;
+    static HotkeyButton upgradePath3Hotkey = null;
 
 
     [HarmonyPatch(typeof(TowerSelectionMenu), nameof(TowerSelectionMenu.Initialise))]
@@ -42,6 +47,16 @@ public partial class Main
     {
         try
         {
+            TaskScheduler.ScheduleTask(() =>
+            {
+                upgradePath1Hotkey = InGame.instance.hotkeys.upgradePath1Hotkey;
+                upgradePath2Hotkey = InGame.instance.hotkeys.upgradePath2Hotkey;
+                upgradePath3Hotkey = InGame.instance.hotkeys.upgradePath3Hotkey;
+                InGame.instance.hotkeys.upgradePath1Hotkey = new HotkeyButton(new InputAction(), new HotKey(), "");
+                InGame.instance.hotkeys.upgradePath2Hotkey = new HotkeyButton(new InputAction(), new HotKey(), "");
+                InGame.instance.hotkeys.upgradePath3Hotkey = new HotkeyButton(new InputAction(), new HotKey(), "");
+            }, () => InGame.instance.hotkeys != null);
+            
             var rect = __instance.towerDetails.GetComponent<RectTransform>().rect;
             var parent = __instance.towerDetails.transform.parent;
 
@@ -66,6 +81,8 @@ public partial class Main
                 45f);
 
             cost.enabled = false;
+
+
             mergebutton =
                 finalselect.AddButton(new Info("MergeButton", 350, 200, new Vector2(.765f, .5f)),
                     VanillaSprites.GreenBtnLong, new Action(() =>
@@ -92,6 +109,7 @@ public partial class Main
 
                             InGame.instance.AddCash(-totalcost);
                             TowerSelectionMenu.instance.selectedTower.tower.worth += totalcost;
+                            
                             
                             HideAllSelected();
                             selectedtower = null;
