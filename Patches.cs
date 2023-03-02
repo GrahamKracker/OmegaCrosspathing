@@ -1,6 +1,7 @@
 ﻿using System;
 using BTD_Mod_Helper.Api;
 using BTD_Mod_Helper.Api.Components;
+using Il2CppAssets.Scripts.Simulation.Objects;
 using Il2CppAssets.Scripts.Unity.UI_New.InGame;
 using Il2CppAssets.Scripts.Unity.UI_New.InGame.AbilitiesMenu;
 using Il2CppAssets.Scripts.Unity.UI_New.InGame.TowerSelectionMenu;
@@ -99,7 +100,16 @@ public partial class Main
                             TowerSelectionMenu.instance.selectedTower.tower.SetTowerModel(newTower);
                             TowerSelectionMenu.instance.selectedTower.tower.towerModel = newTower;
                             TowerSelectionMenu.instance.selectedTower.tower.model = newTower;
-                            
+
+                            var OCMutator = TowerSelectionMenu.instance.selectedTower.tower.mutators.FirstOrDefault(x =>
+                                x.mutator.id.Contains("OC:"))?.mutator;
+                            if (OCMutator is null)
+                            {
+                                OCMutator = new BehaviorMutator("OC:");
+                                TowerSelectionMenu.instance.selectedTower.tower.AddMutator(OCMutator);
+                            }
+
+                            OCMutator.id += selectedtower.GetBaseId()+"-"+selectedtower.tiers[0]+selectedtower.tiers[1]+selectedtower.tiers[2]+",";
                             
                             
                             foreach (var simulationFix in ModContent.GetContent<SimulationFix>())

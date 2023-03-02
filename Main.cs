@@ -1,15 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using BTD_Mod_Helper;
+using BTD_Mod_Helper.Api;
 using BTD_Mod_Helper.Api.Components;
 using BTD_Mod_Helper.Api.Towers;
 using Il2CppAssets.Scripts.Data;
 using Il2CppAssets.Scripts.Models.Profile;
 using Il2CppAssets.Scripts.Models.TowerSets;
+using Il2CppAssets.Scripts.Simulation.Objects;
 using Il2CppAssets.Scripts.Simulation.Towers;
 using Il2CppAssets.Scripts.Unity.UI_New.InGame;
+using Il2CppAssets.Scripts.Unity.UI_New.InGame.TowerSelectionMenu;
 using Il2CppAssets.Scripts.Utils;
 using OmegaCrosspathing;
+using OmegaCrosspathing.SimulationFixes;
 using UnityEngine;
 using UnityEngine.UI;
 using static BTD_Mod_Helper.Api.ModContent;
@@ -25,12 +29,12 @@ namespace OmegaCrosspathing;
 [HarmonyPatch]
 public partial class Main : BloonsTD6Mod
 {
-    private static readonly Dictionary<TowerSet, SpriteReference> backgroundSprites = new()
+    private static readonly Dictionary<TowerSet, string> backgroundSprites = new()
     {
-        { TowerSet.Primary, GameData._instance.towerBackgroundSprites.primarySprite },
-        { TowerSet.Military, GameData._instance.towerBackgroundSprites.militarySprite },
-        { TowerSet.Magic, GameData._instance.towerBackgroundSprites.magicSprite },
-        { TowerSet.Support, GameData._instance.towerBackgroundSprites.supportSprite }
+        { TowerSet.Primary, GameData._instance.towerBackgroundSprites.primarySprite.guidRef },
+        { TowerSet.Military, GameData._instance.towerBackgroundSprites.militarySprite.guidRef },
+        { TowerSet.Magic, GameData._instance.towerBackgroundSprites.magicSprite.guidRef },
+        { TowerSet.Support, GameData._instance.towerBackgroundSprites.supportSprite.guidRef },
     };
 
     private static ModHelperPanel _mainpanel;
@@ -85,7 +89,7 @@ public partial class Main : BloonsTD6Mod
     private static void SetUpTowerButtons()
     {
         List<TowerSet> towersets = new();
-
+        
         towersets.Add(TowerSet.Primary);
         towersets.Add(TowerSet.Military);
         towersets.Add(TowerSet.Magic);
@@ -94,7 +98,7 @@ public partial class Main : BloonsTD6Mod
 
         foreach (var towerSet in towersets)
             CreateTowerSetButton(towerSet.ToString(),
-                "MainMenuUiAtlas[" + towerSet + "Btn]", backgroundSprites[towerSet].guidRef, towerSet: towerSet);
+                "MainMenuUiAtlas[" + towerSet + "Btn]", backgroundSprites[towerSet], towerSet: towerSet);
 
         foreach (var modtowerset in GetContent<ModTowerSet>())
             CreateTowerSetButton(modtowerset.DisplayName, modtowerset.ButtonReference.guidRef,
@@ -163,7 +167,7 @@ public partial class Main : BloonsTD6Mod
                          .Where(tower => tower.towerSet == towerSet))
             {
                 var towerpanel = towersetpanel.AddButton(new Info(tower.name, width, 290),
-                    backgroundSprites.ContainsKey(towerSet) ? backgroundSprites[towerSet].guidRef : "", new Action(() =>
+                     background, new Action(() =>
                     {
                         if (towerselected == tower.name)
                         {
@@ -305,6 +309,35 @@ public partial class Main : BloonsTD6Mod
 
     public override void OnTowerSaved(Tower tower, TowerSaveDataModel saveData)
     {
-        base.OnTowerSaved(tower, saveData);
+        var OCMutator = tower.mutators.FirstOrDefault(x => x.mutator.id.Contains("OC:"));
+        if (OCMutator != null)
+        {
+            saveData.metaData["OC"] = OCMutator.mutator.id;
+        }
+    }
+
+    public override void OnTowerLoaded(Tower tower, TowerSaveDataModel saveData)
+    {
+        base.OnTowerLoaded(tower, saveData);
+
+        if (!saveData.metaData.ContainsKey("OC")) return;
+        
+        var OCMutator = saveData.metaData["OC"];
+        
+        tower.AddMutator(new BehaviorMutator(OCMutator));
+        var split = OCMutator.Split(',');
+
+        for (var i = 1; i < split.Length; i++)
+        {
+            var newTower = Algorithm.Merge(tower.towerModel, InGame.instance.GetGameModel().GetTowerFromId(split[i]));
+            tower.SetTowerModel(newTower);
+            tower.towerModel = newTower;
+            tower.rootModel = newTower;
+            
+            foreach (var simulationFix in ModContent.GetContent<SimulationFix>())
+            {
+                simulationFix.Apply(tower.GetTowerToSim());
+            }
+        }
     }
 }
