@@ -2,7 +2,11 @@
 using System.Collections.Generic;
 using BTD_Mod_Helper;
 using BTD_Mod_Helper.Api.Components;
+using BTD_Mod_Helper.Api.Towers;
 using Il2CppAssets.Scripts.Data;
+using Il2CppAssets.Scripts.Models.Profile;
+using Il2CppAssets.Scripts.Models.TowerSets;
+using Il2CppAssets.Scripts.Simulation.Towers;
 using Il2CppAssets.Scripts.Unity.UI_New.InGame;
 using Il2CppAssets.Scripts.Utils;
 using OmegaCrosspathing;
@@ -29,28 +33,29 @@ public partial class Main : BloonsTD6Mod
         { TowerSet.Support, GameData._instance.towerBackgroundSprites.supportSprite }
     };
 
-    static ModHelperPanel _mainpanel;
+    private static ModHelperPanel _mainpanel;
 
-    static float totalcost;
+    private static float totalcost;
 
-    static ModHelperScrollPanel towersetselect;
-    static ModHelperPanel pathselect;
-    static ModHelperPanel finalselect;
-    static ModHelperImage towerportrait;
-    static ModHelperText cost;
-    static ModHelperButton mergebutton;
-    static ModHelperText mergetext;
-    static ModHelperText invalidtext;
 
-    static readonly Dictionary<TowerSet, List<ModHelperButton>> TowerButtonsBySet = new();
-    static readonly Dictionary<ModHelperButton, ModHelperImage> SelectedImages = new();
+    private static ModHelperScrollPanel towersetselect;
+    private static ModHelperPanel pathselect;
+    private static ModHelperPanel finalselect;
+    private static ModHelperImage towerportrait;
+    private static ModHelperText cost;
+    private static ModHelperButton mergebutton;
+    private static ModHelperText mergetext;
+    private static ModHelperText invalidtext;
 
-    static string towerselected = "";
-    static TowerModel? selectedtower;
+    private static readonly Dictionary<string, List<ModHelperButton>> TowerButtonsBySet = new();
+    private static readonly Dictionary<ModHelperButton, ModHelperImage> SelectedImages = new();
 
-    static readonly ModHelperSlider[] Pathsliders = new ModHelperSlider[3];
+    private static string towerselected = "";
+    private static TowerModel? selectedtower;
 
-    static void SetUpPathInput()
+    private static readonly ModHelperSlider[] Pathsliders = new ModHelperSlider[3];
+
+    private static void SetUpPathInput()
     {
         Object.Destroy(pathselect.Background);
         for (var i = 1; i <= 3; i++)
@@ -77,32 +82,46 @@ public partial class Main : BloonsTD6Mod
         LockInputFields();
     }
 
-    static void SetUpTowerButtons()
+    private static void SetUpTowerButtons()
     {
-        List<TowerSet> towerSets = new();
-        foreach (var set in InGame.instance.GetGameModel().towerSet
-                     .Select(detailsModel => detailsModel.GetTower().towerSet))
-            if (!towerSets.Contains(set))
-                towerSets.Add(set);
+        List<TowerSet> towersets = new();
 
-        foreach (var towerSet in towerSets)
-        {
-            const int width = 250;
-            var towersetpanel = towersetselect.AddPanel(new Info(towerSet.ToString(), width, 300));
-            Object.Destroy(towersetpanel.Background);
+        towersets.Add(TowerSet.Primary);
+        towersets.Add(TowerSet.Military);
+        towersets.Add(TowerSet.Magic);
+        towersets.Add(TowerSet.Support);
 
-            towersetpanel.AddText(new Info("TowerSetName", 0, -17.5f, width, 100, new Vector2(.5f, .95f)),
-                towerSet.ToString(), 50);
 
-            towersetselect.AddScrollContent(towersetpanel);
+        foreach (var towerSet in towersets)
+            CreateTowerSetButton(towerSet.ToString(),
+                "MainMenuUiAtlas[" + towerSet + "Btn]", backgroundSprites[towerSet].guidRef, towerSet: towerSet);
 
-            var towersinset = new List<ModHelperButton>();
+        foreach (var modtowerset in GetContent<ModTowerSet>())
+            CreateTowerSetButton(modtowerset.DisplayName, modtowerset.ButtonReference.guidRef,
+                modtowerset.ContainerReference.guidRef, modtowerset);
+    }
 
+    private static void CreateTowerSetButton(string name, string icon, string background,
+        ModTowerSet modtowerset = null, TowerSet towerSet = TowerSet.None)
+    {
+        const int width = 250;
+        var towersetpanel = towersetselect.AddPanel(new Info(name, width, 300));
+        Object.Destroy(towersetpanel.Background);
+
+        towersetpanel.AddText(new Info("TowerSetName", 0, -17.5f, width, 100, new Vector2(.5f, .95f)),
+            name, 50);
+
+        towersetselect.AddScrollContent(towersetpanel);
+
+        var towersinset = new List<ModHelperButton>();
+
+
+        if (modtowerset != null)
             foreach (var tower in InGame.instance.GetGameModel().towerSet.Select(model => model.GetTower())
-                         .Where(tower => tower.towerSet == towerSet))
+                         .Where(tower => tower.GetModTower()?.GetPropertyValue("ModTowerSet") == modtowerset))
             {
                 var towerpanel = towersetpanel.AddButton(new Info(tower.name, width, 290),
-                    backgroundSprites[towerSet].guidRef, new Action((() =>
+                    background, new Action(() =>
                     {
                         if (towerselected == tower.name)
                         {
@@ -127,7 +146,49 @@ public partial class Main : BloonsTD6Mod
 
                         UpdateBottomBar();
                         UnlockInputFields();
-                    })));
+                    }));
+
+                towerpanel.AddImage(new Info("TowerButton", width, width, new Vector2(.5f, .55f)),
+                    tower.portrait.guidRef);
+
+                SelectedImages[towerpanel] = towerpanel.AddImage(new Info("TowerSelected", width + 80, 370),
+                    VanillaSprites.SmallSquareGlowOutline);
+
+                towersetselect.AddScrollContent(towerpanel);
+                towersinset.Add(towerpanel);
+                towerpanel.SetActive(false);
+            }
+        else
+            foreach (var tower in InGame.instance.GetGameModel().towerSet.Select(model => model.GetTower())
+                         .Where(tower => tower.towerSet == towerSet))
+            {
+                var towerpanel = towersetpanel.AddButton(new Info(tower.name, width, 290),
+                    backgroundSprites.ContainsKey(towerSet) ? backgroundSprites[towerSet].guidRef : "", new Action(() =>
+                    {
+                        if (towerselected == tower.name)
+                        {
+                            HideAllSelected();
+                            selectedtower = null;
+                            Pathsliders[0].SetCurrentValue(0);
+                            Pathsliders[1].SetCurrentValue(0);
+                            Pathsliders[2].SetCurrentValue(0);
+                            UpdateBottomBar();
+                            return;
+                        }
+
+                        HideAllSelected();
+
+                        towersetpanel.transform.parent.FindChild(tower.name).FindChild("TowerSelected").gameObject
+                            .SetActive(true);
+                        towerselected = tower.baseId;
+
+                        selectedtower = InGame.instance.GetGameModel().GetTowerModel(towerselected,
+                            (int)Pathsliders[0].CurrentValue, (int)Pathsliders[1].CurrentValue,
+                            (int)Pathsliders[2].CurrentValue);
+
+                        UpdateBottomBar();
+                        UnlockInputFields();
+                    }));
 
                 towerpanel.AddImage(new Info("TowerButton", width, width, new Vector2(.5f, .55f)),
                     tower.portrait.guidRef);
@@ -140,30 +201,30 @@ public partial class Main : BloonsTD6Mod
                 towerpanel.SetActive(false);
             }
 
-            var towersetButton = towersetpanel.AddButton(new Info("TowerSetButton", InfoPreset.FillParent),
-                backgroundSprites[towerSet].guidRef, new Action(() =>
-                {
-                    HideAllSelected();
-                    SwitchTowerSetVisibility(towerSet);
-                }));
+
+        var towersetButton = towersetpanel.AddButton(new Info("TowerSetButton", InfoPreset.FillParent),
+            background, new Action(() =>
+            {
+                HideAllSelected();
+                SwitchTowerSetVisibility(name);
+            }));
 
 
-            towersetButton.AddImage(new Info("TowerSetImage", 0, -20f, 230),
-                "MainMenuUiAtlas[" + towerSet + "Btn]");
+        towersetButton.AddImage(new Info("TowerSetImage", 0, -20f, 230),
+            icon);
 
-            towersetButton.AddText(new Info("TowerSetName", 0, -17.5f, width, 100, new Vector2(.5f, .95f)),
-                towerSet.ToString(), 50);
+        towersetButton.AddText(new Info("TowerSetName", 0, -17.5f, width, 100, new Vector2(.5f, .95f)),
+            name, 50);
 
-            towersetButton.AddImage(new Info("ExpandArrow", 100, 100, new Vector2(.925f, .5f)),
-                    GetSpriteReference<Main>("RoundSetSwitcherButton").guidRef).transform.rotation =
-                Quaternion.Euler(0, 0, 90);
+        towersetButton.AddImage(new Info("ExpandArrow", 100, 100, new Vector2(.925f, .5f)),
+                GetSpriteReference<Main>("RoundSetSwitcherButton").guidRef).transform.rotation =
+            Quaternion.Euler(0, 0, 90);
 
 
-            TowerButtonsBySet[towerSet] = towersinset;
-        }
+        TowerButtonsBySet[name] = towersinset;
     }
 
-    static void UpdateBottomBar()
+    private static void UpdateBottomBar()
     {
         if (selectedtower == null)
         {
@@ -192,7 +253,7 @@ public partial class Main : BloonsTD6Mod
         towerportrait.Image.SetSprite(selectedtower.portrait.guidRef);
     }
 
-    static void UnlockInputFields()
+    private static void UnlockInputFields()
     {
         foreach (var inputField in Pathsliders)
         {
@@ -204,7 +265,7 @@ public partial class Main : BloonsTD6Mod
         }
     }
 
-    static void LockInputFields()
+    private static void LockInputFields()
     {
         foreach (var inputField in Pathsliders)
         {
@@ -222,26 +283,28 @@ public partial class Main : BloonsTD6Mod
         }
     }
 
-    private static void SwitchTowerSetVisibility(TowerSet towerSet)
+    private static void SwitchTowerSetVisibility(string towerSet)
     {
         LockInputFields();
         foreach (var towerPanel in TowerButtonsBySet[towerSet]) towerPanel.SetActive(!towerPanel.isActiveAndEnabled);
 
-        TowerButtonsBySet[towerSet][0].transform.parent.FindChild(towerSet.ToString()).FindChild("TowerSetButton")
+        TowerButtonsBySet[towerSet][0].transform.parent.FindChild(towerSet).FindChild("TowerSetButton")
                 .FindChild("ExpandArrow").transform.rotation =
             Quaternion.Euler(0, 0, TowerButtonsBySet[towerSet][0].isActiveAndEnabled ? 270 : 90);
     }
 
-    static void HideAllSelected()
+    private static void HideAllSelected()
     {
-        foreach (var (_, image) in SelectedImages.Where(x=>x.Value != null))
-        {
-            image.gameObject.SetActive(false);
-        }
+        foreach (var (_, image) in SelectedImages.Where(x => x.Value != null)) image.gameObject.SetActive(false);
 
         towerselected = "";
         selectedtower = null;
         LockInputFields();
         UpdateBottomBar();
+    }
+
+    public override void OnTowerSaved(Tower tower, TowerSaveDataModel saveData)
+    {
+        base.OnTowerSaved(tower, saveData);
     }
 }
