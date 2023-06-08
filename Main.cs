@@ -42,7 +42,7 @@ public partial class Main : BloonsTD6Mod
 
     private static float totalcost;
     
-    public static bool HasPathsPlusPlus = ModHelper.HasMod("PathsPlusPlus");
+    public static bool HasPathsPlusPlus => ModHelper.HasMod("PathsPlusPlus");
     private static ModHelperScrollPanel towersetselect;
     private static ModHelperScrollPanel pathselect;
     private static ModHelperPanel finalselect;
@@ -167,46 +167,48 @@ public partial class Main : BloonsTD6Mod
 
     public static void DestroyPathsPlusPlusSliders()
     {
-        pathselect.ScrollRect.StopMovement();
-        pathselect.ScrollRect.SetNormalizedPosition(.5f, 0);
-        pathselect.ScrollRect.enabled = false;
-        foreach (var slider in Pathsplusplussliders.Values)
-            Object.Destroy(slider.transform.parent.gameObject);
-        Pathsplusplussliders.Clear();
+        if (HasPathsPlusPlus)
+        {
+            pathselect.ScrollRect.StopMovement();
+            pathselect.ScrollRect.SetNormalizedPosition(.5f, 0);
+            pathselect.ScrollRect.enabled = false;
+            foreach (var slider in Pathsplusplussliders.Values)
+                Object.Destroy(slider.transform.parent.gameObject);
+            Pathsplusplussliders.Clear();
+        }
     }
 
     public static void GeneratePathsPlusPlusSliders(string baseId)
     {
+        if (!HasPathsPlusPlus) return;
+        
         DestroyPathsPlusPlusSliders();
 
-        if (HasPathsPlusPlus)
+        foreach (var path in GetContent<PathPlusPlus>().Where(p => p.Tower == baseId))
         {
-            foreach (var path in GetContent<PathPlusPlus>().Where(p => p.Tower == baseId))
-            {
-                var i = path.Path + 1;
-                var currentpath = pathselect.AddPanel(new Info($"Path{i}", 290, 300), VanillaSprites.BrownInsertPanel);
-                currentpath.AddText(new Info($"Path{i}Text", 290, 100, new Vector2(.5f, .85f)), $"Path {i}", 50f);
+            var i = path.Path + 1;
+            var currentpath = pathselect.AddPanel(new Info($"Path{i}", 290, 300), VanillaSprites.BrownInsertPanel);
+            currentpath.AddText(new Info($"Path{i}Text", 290, 100, new Vector2(.5f, .85f)), $"Path {i}", 50f);
 
-                var slider = currentpath.AddSlider(new Info($"Path{i}Input", 180, 60, new Vector2(.5f, .35f)), 0, 0, 5,
-                    1,
-                    new Vector2(85, 85), new Action<float>(
-                        tier =>
-                        {
-                            selectedtower = InGame.instance.GetGameModel().GetTowerModel(selectedBaseID,
-                                (int)Pathsliders[0].CurrentValue, (int)Pathsliders[1].CurrentValue,
-                                (int)Pathsliders[2].CurrentValue);
-                            ApplyPathPlusPlus(path,(int)tier, ref selectedtower);
-                            UpdateBottomBar();
-                        }
-                    ));
+            var slider = currentpath.AddSlider(new Info($"Path{i}Input", 180, 60, new Vector2(.5f, .35f)), 0, 0, 5,
+                1,
+                new Vector2(85, 85), new Action<float>(
+                    tier =>
+                    {
+                        selectedtower = InGame.instance.GetGameModel().GetTowerModel(selectedBaseID,
+                            (int)Pathsliders[0].CurrentValue, (int)Pathsliders[1].CurrentValue,
+                            (int)Pathsliders[2].CurrentValue);
+                        ApplyPathPlusPlus(path,(int)tier, ref selectedtower);
+                        UpdateBottomBar();
+                    }
+                ));
 
-                Object.Destroy(slider.DefaultNotch.gameObject);
-                pathselect.AddScrollContent(currentpath);
-                Pathsplusplussliders[i] = slider;
+            Object.Destroy(slider.DefaultNotch.gameObject);
+            pathselect.AddScrollContent(currentpath);
+            Pathsplusplussliders[i] = slider;
                 
-                pathselect.ScrollRect.enabled = true;
-                pathselect.ScrollRect.horizontalNormalizedPosition = 0f;
-            }
+            pathselect.ScrollRect.enabled = true;
+            pathselect.ScrollRect.horizontalNormalizedPosition = 0f;
         }
     }
 
@@ -285,7 +287,10 @@ public partial class Main : BloonsTD6Mod
                 var towerpanel = towersetpanel.AddButton(new Info(tower.name, width, 290),
                     background, new Action(() =>
                     {
-                        GeneratePathsPlusPlusSliders(tower.baseId);
+                        if (HasPathsPlusPlus)
+                        {
+                            GeneratePathsPlusPlusSliders(tower.baseId);
+                        }
 
                         if (selectedBaseID == tower.name)
                         {
@@ -500,7 +505,7 @@ public partial class Main : BloonsTD6Mod
 
     public override void OnTowerSaved(Tower tower, TowerSaveDataModel saveData)
     {
-        var OCMutator = tower.GetMutator("OC").TryCast<SupportRemoveFilterOutTag.MutatorTower>();
+        var OCMutator = tower.GetMutator("OC")?.TryCast<SupportRemoveFilterOutTag.MutatorTower>();
         if (OCMutator != null)
             saveData.metaData["OC"] = OCMutator.removeScriptsWithSupportMutatorId;
     }
