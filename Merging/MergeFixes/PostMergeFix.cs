@@ -1,6 +1,6 @@
 ﻿using BTD_Mod_Helper.Api;
 
-namespace OmegaCrosspathing.MergeFixes;
+namespace OmegaCrosspathing.Merging.MergeFixes;
 
 public abstract class PostMergeFix : ModContent
 {
@@ -9,11 +9,9 @@ public abstract class PostMergeFix : ModContent
 
     public virtual void Apply(TowerModel model)
     {
-        
     }
 
-    public virtual void Apply(TowerModel first, TowerModel second, ref TowerModel combined)
+    public virtual void Apply(TowerModel model, TowerModel second)
     {
-        
     }
 }

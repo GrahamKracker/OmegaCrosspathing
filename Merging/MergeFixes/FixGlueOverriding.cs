@@ -4,7 +4,7 @@ using Il2CppAssets.Scripts.Models.Towers.Filters;
 using Il2CppAssets.Scripts.Models.Towers.Projectiles;
 using Il2CppAssets.Scripts.Models.Towers.Projectiles.Behaviors;
 
-namespace OmegaCrosspathing.MergeFixes;
+namespace OmegaCrosspathing.Merging.MergeFixes;
 
 public class FixGlueOverriding : PostMergeFix
 {

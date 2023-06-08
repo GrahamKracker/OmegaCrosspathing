@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Reflection;
 
+namespace OmegaCrosspathing;
+
 public static class ReflectionHelper
 {
     private static PropertyInfo GetPropertyInfo(Type type, string propertyName)

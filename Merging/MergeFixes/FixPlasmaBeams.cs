@@ -1,7 +1,7 @@
 ﻿using Il2CppAssets.Scripts.Models.Towers.Behaviors.Attack;
 using Il2CppAssets.Scripts.Models.Towers.Behaviors.Emissions;
 
-namespace OmegaCrosspathing.MergeFixes;
+namespace OmegaCrosspathing.Merging.MergeFixes;
 
 public class FixPlasmaBeams : PostMergeFix
 {

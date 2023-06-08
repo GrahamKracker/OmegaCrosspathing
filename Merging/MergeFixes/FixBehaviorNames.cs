@@ -1,4 +1,4 @@
-﻿namespace OmegaCrosspathing.MergeFixes;
+﻿namespace OmegaCrosspathing.Merging.MergeFixes;
 
 public class FixBehaviorNames : PostMergeFix
 {

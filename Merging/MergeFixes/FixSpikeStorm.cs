@@ -1,7 +1,7 @@
 ﻿using Il2CppAssets.Scripts.Models.Towers.Behaviors.Abilities.Behaviors;
 using Il2CppAssets.Scripts.Models.Towers.Projectiles.Behaviors;
 
-namespace OmegaCrosspathing.MergeFixes;
+namespace OmegaCrosspathing.Merging.MergeFixes;
 
 public class FixSpikeStorm : PostMergeFix
 {

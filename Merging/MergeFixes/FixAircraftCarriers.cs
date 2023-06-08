@@ -7,7 +7,7 @@ using Il2CppAssets.Scripts.Models.Towers.Projectiles.Behaviors;
 using Il2CppAssets.Scripts.Models.Towers.Weapons;
 using Il2CppAssets.Scripts.Models.Towers.Weapons.Behaviors;
 
-namespace OmegaCrosspathing.MergeFixes;
+namespace OmegaCrosspathing.Merging.MergeFixes;
 
 public class FixAircraftCarriers : PostMergeFix
 {
@@ -76,7 +76,7 @@ public class FixAircraftCarriers : PostMergeFix
                 if (!attackModel.HasBehavior<DisplayModel>())
                 {
                     attackModel.AddBehavior(new DisplayModel("DisplayModel_AttackDisplay",
-                        CreatePrefabReference(""), 0));
+                        CreatePrefabReference(""), 0, DisplayCategory.Default));
                 }
             });
         }

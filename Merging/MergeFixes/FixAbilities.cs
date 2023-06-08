@@ -1,7 +1,6 @@
 ﻿using Il2CppAssets.Scripts.Models.Towers.Behaviors.Abilities.Behaviors;
 
-
-namespace OmegaCrosspathing.MergeFixes;
+namespace OmegaCrosspathing.Merging.MergeFixes;
 
 public class FixAbilities : PostMergeFix
 {
