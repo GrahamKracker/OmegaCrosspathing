@@ -2,37 +2,23 @@
 using BTD_Mod_Helper.Api;
 using BTD_Mod_Helper.Api.Components;
 using Il2CppAssets.Scripts.Models;
+using Il2CppAssets.Scripts.Simulation.Objects;
+using Il2CppAssets.Scripts.Simulation.Towers;
 using Il2CppAssets.Scripts.Simulation.Towers.Behaviors;
 using Il2CppAssets.Scripts.Unity.UI_New.InGame;
 using Il2CppAssets.Scripts.Unity.UI_New.InGame.AbilitiesMenu;
 using Il2CppAssets.Scripts.Unity.UI_New.InGame.TowerSelectionMenu;
 using OmegaCrosspathing.Merging;
 using UnityEngine;
+using static OmegaCrosspathing.UI;
 
 namespace OmegaCrosspathing;
+
 public partial class Main
 {
-    private static void SwitchToNormalUpgrades(bool isOn)
-    {        
-        _mainpanel.gameObject.SetActive(!isOn);
-        TowerSelectionMenu.instance.towerDetails.SetActive(isOn);
-
-        foreach (var button in TowerSelectionMenu.instance.upgradeButtons)
-        {
-            button.gameObject.SetActive(isOn);
-        }
-        
-        for(var i = 0; i < TowerSelectionMenu.instance.towerDetails.transform.childCount; i++)
-        {
-            TowerSelectionMenu.instance.towerDetails.transform.GetChild(i).gameObject.SetActive(isOn);
-        }
-
-        
-    }
-
     [HarmonyPatch(typeof(TowerSelectionMenu), nameof(TowerSelectionMenu.Show))]
     [HarmonyPostfix]
-    private static void TowerSelectionMenu_Show(TowerSelectionMenu __instance)
+    public static void TowerSelectionMenu_Show(TowerSelectionMenu __instance)
     {
         if (__instance.selectedTower is null)
         {
@@ -41,30 +27,40 @@ public partial class Main
 
         TaskScheduler.ScheduleTask(() => //required for paths++ support
         {
-            if (__instance.selectedTower.owner != InGame.instance.UnityToSimulation.MyPlayerNumber || __instance.selectedTower.tower.towerModel.IsHero())
-            {
-                SwitchToNormalUpgrades(true);
-                return;
-            }
-            
-            if (__instance.selectedTower.tower.towerModel.isParagon)
+            if (__instance.selectedTower.owner != InGame.instance.UnityToSimulation.MyPlayerNumber)
             {
                 _mainpanel.gameObject.SetActive(false);
-                __instance.paragonDetails.SetActive(true);
-                
-                
                 return;
             }
 
-            SwitchToNormalUpgrades(false);
+            if (__instance.selectedTower.tower.towerModel.IsHero())
+            {
+                _mainpanel.gameObject.SetActive(false);
+                return;
+            }
+
+            if (__instance.selectedTower.tower.towerModel.isParagon)
+            {
+                _mainpanel.gameObject.SetActive(false);
+                return;
+            }
+
+            _mainpanel.gameObject.SetActive(true);
+
+            for (var i = 0; i < TowerSelectionMenu.instance.towerDetails.transform.childCount; i++)
+            {
+                TowerSelectionMenu.instance.towerDetails.transform.GetChild(i).gameObject.SetActive(false);
+            }
+
         });
     }
 
 
     [HarmonyPatch(typeof(TowerSelectionMenu), nameof(TowerSelectionMenu.Initialise))]
     [HarmonyPostfix]
-    private static void TowerSelectionMenu_Initialise(TowerSelectionMenu __instance)
+    public static void TowerSelectionMenu_Initialise(TowerSelectionMenu __instance)
     {
+        //MelonLogger.Msg("TowerSelectionMenu_Initialise");
         var rect = __instance.towerDetails.GetComponent<RectTransform>().rect;
 
         _mainpanel =
@@ -75,13 +71,13 @@ public partial class Main
                 rect.width,
                 rect.height / 3, new Vector2(.5f, .85f)), RectTransform.Axis.Horizontal,
             VanillaSprites.BrownInsertPanel, 15, 50);
-        
+
         towersetselect.ScrollContent.transform.Cast<RectTransform>().pivot = new Vector2(0, 0);
-        
+
         pathselect = _mainpanel.AddScrollPanel(new Info("PathSelect",
             rect.width, rect.height / 3), RectTransform.Axis.Horizontal, "", 15f, 0);
         pathselect.Mask.showMaskGraphic = false;
-        
+
         levelselect = _mainpanel.AddPanel(new Info("LevelSelect",
             rect.width,
             rect.height / 3), null, RectTransform.Axis.Horizontal, 15f);
@@ -106,8 +102,9 @@ public partial class Main
                         return;
                     }
 
-                    var OCMutator = TowerSelectionMenu.instance.selectedTower.tower.GetMutator("OC")?.Cast<SupportRemoveFilterOutTag.MutatorTower>();
-                    
+                    var OCMutator = TowerSelectionMenu.instance.selectedTower.tower.GetMutator("OC")
+                        ?.Cast<SupportRemoveFilterOutTag.MutatorTower>();
+
                     if (TowerSelectionMenu.instance.selectedTower.tower.mutators != null)
                         TowerSelectionMenu.instance.selectedTower.tower.RemoveMutatorsById("OC");
 
@@ -117,11 +114,11 @@ public partial class Main
                     {
                         savedata = "hero:" + selectedtower.GetBaseId() + ":" + selectedtower.tiers[0];
                     }
-                    
-                    
+
+
                     TowerSelectionMenu.instance.selectedTower.tower.AddMutator(
                         new SupportRemoveFilterOutTag.MutatorTower("OC",
-                            OCMutator?.removeScriptsWithSupportMutatorId + savedata + ",", 
+                            OCMutator?.removeScriptsWithSupportMutatorId + savedata + ",",
                             null));
 
                     var owner = TowerSelectionMenu.instance.selectedTower.tower.owner;
@@ -200,12 +197,14 @@ public partial class Main
             if (id.StartsWith("hero:"))
             {
                 var nonheroid = id.Replace("hero:", "");
-                towerToMerge = InGame.instance.GetGameModel().GetTowerModel(nonheroid.Split(':')[0], int.Parse(nonheroid.Split(':')[1]));
+                towerToMerge = InGame.instance.GetGameModel()
+                    .GetTowerModel(nonheroid.Split(':')[0], int.Parse(nonheroid.Split(':')[1]));
             }
             else
             {
                 var tiers = id.Split(':')[1];
-                towerToMerge = InGame.instance.GetGameModel().GetTowerModel(id.Split(':')[0], int.Parse(tiers.Split('-')[0]), int.Parse(tiers.Split('-')[1]), int.Parse(tiers.Split('-')[2]));
+                towerToMerge = InGame.instance.GetGameModel().GetTowerModel(id.Split(':')[0],
+                    int.Parse(tiers.Split('-')[0]), int.Parse(tiers.Split('-')[1]), int.Parse(tiers.Split('-')[2]));
             }
 
             Algorithm.Merge(tower, towerToMerge);
@@ -214,4 +213,8 @@ public partial class Main
         __result = true;
         return false;
     }
+    
+    [HarmonyPatch(typeof(Tower), nameof(Tower.AddMutator))]   
+    [HarmonyPrefix]
+    static bool Tower_AddMutator(Tower __instance, BehaviorMutator mutator)=> !(__instance.towerModel.isSubTower && mutator.id == "OC");
 }

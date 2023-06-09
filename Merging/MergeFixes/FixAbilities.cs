@@ -6,7 +6,7 @@ public class FixAbilities : PostMergeFix
 {
     public override void Apply(TowerModel model)
     {
-        foreach (var ability in model.GetAbilities().Where(abilityModel => abilityModel.displayName == "Supply Drop" || abilityModel.displayName == "Bomb Blitz"))
+        foreach (var ability in model.GetAbilities().Where(abilityModel => abilityModel.displayName is "Supply Drop" or "Bomb Blitz"))
         {
             var activateAttackModel = ability.GetBehavior<ActivateAttackModel>();
             activateAttackModel.isOneShot = true;

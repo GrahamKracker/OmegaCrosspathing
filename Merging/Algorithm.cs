@@ -73,7 +73,7 @@ public static class Algorithm
     }
 
 
-    private static readonly HashSet<string> DontMerge = new()
+    public static readonly HashSet<string> DontMerge = new()
     {
         "animation",
         "offsetX",
@@ -88,26 +88,26 @@ public static class Algorithm
         "isGeraldoItem"
     };
 
-    private static readonly HashSet<string> Multiplicative = new()
+    public static readonly HashSet<string> Multiplicative = new()
     {
         "pierce",
         "range"
     };
 
-    private static readonly Dictionary<string, string> StringOverrides = new()
+    public static readonly Dictionary<string, string> StringOverrides = new()
     {
         { "fcddee8a92f5d2e4d8605a8924566620", "69bf8d5932f2bea4f9ce36f861240d2e" }, //DartMonkey-340
         { "0ddd8752be0d3554cb0db6abe6686e8e", "69bf8d5932f2bea4f9ce36f861240d2e" } //DartMonkey-043
     };
 
-    private static readonly Dictionary<(string, Type), bool> BetterBooleans = new()
+    public static readonly Dictionary<(string, Type), bool> BetterBooleans = new()
     {
         { ("isActive", Il2CppType.Of<FilterModel>()), false },
         { ("ignoreBlockers", Il2CppType.Of<ProjectileModel>()), true },
         { ("isSharedRangeEnabled", Il2CppType.Of<TargetSupplierModel>()), true },
     };
 
-    private static Object DeepMerge(Object left, Object right, Object ancestor, History history,
+    public static Object DeepMerge(Object left, Object right, Object ancestor, History history,
         bool shallow = false)
     {
         if (right is null)
@@ -234,7 +234,7 @@ public static class Algorithm
         }
     }
 
-    private static Object MergeArray(MemberInfo memberInfo, Object left, Object right, Object ancestor,
+    public static Object MergeArray(MemberInfo memberInfo, Object left, Object right, Object ancestor,
         History history, bool shallow = false)
     {
         if (left == null && right != null)
@@ -382,7 +382,7 @@ public static class Algorithm
     /// <param name="rightValue"></param>
     /// <param name="ancestorValue"></param>
     /// <returns></returns>
-    private static Object MergeInt(MemberInfo memberInfo, Object leftValue, Object rightValue, Object ancestorValue)
+    public static Object MergeInt(MemberInfo memberInfo, Object leftValue, Object rightValue, Object ancestorValue)
     {
         if (leftValue == null)
         {
@@ -423,7 +423,7 @@ public static class Algorithm
     /// <param name="rightValue"></param>
     /// <param name="ancestorValue"></param>
     /// <returns></returns>
-    private static Object MergeFloat(MemberInfo memberInfo, Object leftValue, Object rightValue,
+    public static Object MergeFloat(MemberInfo memberInfo, Object leftValue, Object rightValue,
         Object ancestorValue)
     {
         if (leftValue == null)
@@ -465,7 +465,7 @@ public static class Algorithm
     /// <param name="rightValue"></param>
     /// <param name="history"></param>
     /// <returns></returns>
-    private static Object MergeBool(MemberInfo memberInfo, Object leftValue, Object rightValue, History history)
+    public static Object MergeBool(MemberInfo memberInfo, Object leftValue, Object rightValue, History history)
     {
         if (leftValue == null)
         {
@@ -507,7 +507,7 @@ public static class Algorithm
     /// <param name="rightValue"></param>
     /// <param name="ancestorValue"></param>
     /// <returns></returns>
-    private static Object MergeString(MemberInfo memberInfo, Object leftValue, Object rightValue,
+    public static Object MergeString(MemberInfo memberInfo, Object leftValue, Object rightValue,
         Object ancestorValue)
     {
         try
@@ -564,7 +564,7 @@ public static class Algorithm
     /// <param name="ancestor"></param>
     /// <param name="history"></param>
     /// <returns></returns>
-    private static Object MergeDifferentModels(Object left, Object right, Object ancestor, History history)
+    public static Object MergeDifferentModels(Object left, Object right, Object ancestor, History history)
     {
         var leftModel = left.Cast<Model>();
         var rightModel = right.Cast<Model>();
@@ -630,7 +630,7 @@ public static class Algorithm
         return leftModel;
     }
 
-    private static Object ShallowMerge(Object left, Object right, Object ancestor, History history)
+    public static Object ShallowMerge(Object left, Object right, Object ancestor, History history)
     {
         var leftFields = left.GetIl2CppType().GetFields();
         foreach (var memberInfo in leftFields)
@@ -676,7 +676,7 @@ public static class Algorithm
         return left;
     }
 
-    private static int GetCountForEmissionModel(Object methodInfo, EmissionModel emissionModel)
+    public static int GetCountForEmissionModel(Object methodInfo, EmissionModel emissionModel)
     {
         var count = 1;
         if (emissionModel.IsType<LineProjectileEmissionModel>())
@@ -701,7 +701,7 @@ public static class Algorithm
         return count;
     }
 
-    private static void Log(string msg, int depth)
+    public static void Log(string msg, int depth)
     {
         for (var i = 0; i < depth; i++)
         {
@@ -710,7 +710,7 @@ public static class Algorithm
         //ModHelper.Msg<UltimateCrosspathingMod>(msg);
     }
 
-    private static bool ModelsAreTheSame(Model leftModel, Model rightModel, bool array, History history)
+    public static bool ModelsAreTheSame(Model leftModel, Model rightModel, bool array, History history)
     {
         if (leftModel.IsType<AbilityModel>(out var leftAbility) &&
             rightModel.IsType<AbilityModel>(out var rightAbility))
@@ -771,11 +771,10 @@ public static class Algorithm
             }
         }
 
-        return rightModel.name == leftModel.name
-               && rightModel.GetIl2CppType().Name == leftModel.GetIl2CppType().Name;
+        return rightModel.name == leftModel.name && rightModel.GetIl2CppType().Name == leftModel.GetIl2CppType().Name;
     }
 
-    /*private static bool IsType<T>(this Object objectBase)
+    /*public static bool IsType<T>(this Object objectBase)
     {
         return objectBase.GetIl2CppType().IsType<T>();
     }*/
