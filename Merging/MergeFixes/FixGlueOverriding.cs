@@ -8,11 +8,11 @@ namespace OmegaCrosspathing.Merging.MergeFixes;
 
 public class FixGlueOverriding : PostMergeFix
 {
-    public override void Apply(TowerModel model)
+    public override void Apply(TowerModel tower)
     {
-        if (model.appliedUpgrades.Contains(UpgradeType.MOABGlue))
+        if (tower.appliedUpgrades.Contains(UpgradeType.MOABGlue))
         {
-            model.GetDescendants<ProjectileModel>().ForEach(projectileModel =>
+            tower.GetDescendants<ProjectileModel>().ForEach(projectileModel =>
             {
                 var behaviors = projectileModel.behaviors.ToList();
                 behaviors.RemoveAll(m => m.name == "SlowModifierForTagModel_");
@@ -20,25 +20,25 @@ public class FixGlueOverriding : PostMergeFix
             });
 
             var lifeSpan = 0f;
-            model.GetDescendants<SlowForBloonModel>().ForEach(m => { lifeSpan = Math.Max(lifeSpan, m.Lifespan); });
-            model.GetDescendants<SlowModel>().ForEach(m => { lifeSpan = Math.Max(lifeSpan, m.Lifespan); });
-            model.GetDescendants<AddBehaviorToBloonModel>().ForEach(m =>
+            tower.GetDescendants<SlowForBloonModel>().ForEach(m => { lifeSpan = Math.Max(lifeSpan, m.Lifespan); });
+            tower.GetDescendants<SlowModel>().ForEach(m => { lifeSpan = Math.Max(lifeSpan, m.Lifespan); });
+            tower.GetDescendants<AddBehaviorToBloonModel>().ForEach(m =>
             {
                 lifeSpan = Math.Max(lifeSpan, m.lifespan);
             });
 
-            model.GetDescendants<SlowForBloonModel>().ForEach(m => { m.Lifespan = lifeSpan; });
-            model.GetDescendants<SlowModel>().ForEach(m => { m.Lifespan = lifeSpan; });
-            model.GetDescendants<AddBehaviorToBloonModel>().ForEach(m => { m.lifespan = lifeSpan; });
+            tower.GetDescendants<SlowForBloonModel>().ForEach(m => { m.Lifespan = lifeSpan; });
+            tower.GetDescendants<SlowModel>().ForEach(m => { m.Lifespan = lifeSpan; });
+            tower.GetDescendants<AddBehaviorToBloonModel>().ForEach(m => { m.lifespan = lifeSpan; });
 
-            model.GetDescendants<AttackFilterModel>().ForEach(filterModel =>
+            tower.GetDescendants<AttackFilterModel>().ForEach(filterModel =>
             {
                 var models = filterModel.filters.ToList();
                 models.RemoveAll(m => m.IsType<FilterOutTagModel>());
                 filterModel.filters = models.ToIl2CppReferenceArray();
             });
 
-            model.GetDescendants<ProjectileFilterModel>().ForEach(filterModel =>
+            tower.GetDescendants<ProjectileFilterModel>().ForEach(filterModel =>
             {
                 var models = filterModel.filters.ToList();
                 models.RemoveAll(m => m.IsType<FilterOutTagModel>());

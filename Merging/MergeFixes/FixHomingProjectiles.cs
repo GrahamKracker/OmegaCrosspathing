@@ -5,9 +5,9 @@ namespace OmegaCrosspathing.Merging.MergeFixes;
 
 public class FixHomingProjectiles : PostMergeFix
 {
-    public override void Apply(TowerModel model)
+    public override void Apply(TowerModel tower)
     {
-        foreach (var projectileModel in model.GetDescendants<ProjectileModel>().ToList().Where(projectileModel => projectileModel.GetBehavior<RetargetOnContactModel>() != null))
+        foreach (var projectileModel in tower.GetDescendants<ProjectileModel>().ToList().Where(projectileModel => projectileModel.GetBehavior<RetargetOnContactModel>() != null))
         {
             projectileModel.RemoveBehavior<FollowPathModel>();
         }

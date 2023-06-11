@@ -2,11 +2,11 @@
 
 public class FixAutoCollectings : PostMergeFix
 {
-    public override void Apply(TowerModel model)
+    public override void Apply(TowerModel tower)
     {
-        if (model.appliedUpgrades.Contains(UpgradeType.BananaSalvage))
+        if (tower.appliedUpgrades.Contains(UpgradeType.BananaSalvage))
         {
-            model.GetDescendants<BankModel>().ForEach(bankModel => { bankModel.autoCollect = true; });
+            tower.GetDescendants<BankModel>().ForEach(bankModel => { bankModel.autoCollect = true; });
         }
     }
 }

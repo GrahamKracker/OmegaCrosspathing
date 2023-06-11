@@ -4,18 +4,17 @@ namespace OmegaCrosspathing.Merging.MergeFixes;
 
 public class FixTemples : PostMergeFix
 {
-    public override void Apply(TowerModel model)
+    public override void Apply(TowerModel tower)
     {
-        if (model.appliedUpgrades.Contains(UpgradeType.SunTemple))
+        if (tower.appliedUpgrades.Contains(UpgradeType.SunTemple))
         {
-            foreach (var attackModel in model.GetAttackModels())
+            foreach (var attackModel in tower.GetAttackModels())
             {
-                var rotateToTargetModel = attackModel.GetBehavior<RotateToTargetModel>();
-                if (rotateToTargetModel != null)
+                if (attackModel.HasBehavior<RotateToTargetModel>())
                 {
-                    rotateToTargetModel.rotateTower = false;
+                    attackModel.GetBehavior<RotateToTargetModel>().rotateTower = false;
                 }
-
+                
                 attackModel.RemoveBehaviors<RotateToMiddleOfTargetsModel>();
             }
         }

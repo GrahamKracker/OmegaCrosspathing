@@ -5,12 +5,12 @@ namespace OmegaCrosspathing.Merging.MergeFixes;
 
 public class FixSpectre : PostMergeFix
 {
-    public override void Apply(TowerModel model)
+    public override void Apply(TowerModel tower)
     {
-        if (model.appliedUpgrades.Contains(UpgradeType.NevaMissTargeting))
+        if (tower.appliedUpgrades.Contains(UpgradeType.NevaMissTargeting))
         {
-            var trackTargetModel = model.GetDescendant<TrackTargetModel>();
-            model.GetAttackModels().ForEach(attackModel =>
+            var trackTargetModel = tower.GetDescendant<TrackTargetModel>();
+            tower.GetAttackModels().ForEach(attackModel =>
             {
                 attackModel.GetDescendants<ProjectileModel>().ForEach(projectileModel =>
                 {

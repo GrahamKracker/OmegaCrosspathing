@@ -37,6 +37,7 @@ public class UI
     public static ModHelperText invalidtext;
     public static ModHelperPanel levelselect;
     public static ModHelperSlider levelslider;
+    public static ModHelperPanel OCTogglePanel;
 
     public static readonly Dictionary<string, List<ModHelperButton>> TowerButtonsBySet = new();
     public static readonly Dictionary<ModHelperButton, ModHelperImage> SelectedImages = new();
@@ -58,7 +59,7 @@ public class UI
                 _ =>
                 {
                     Main.selectedtower = InGame.instance.GetGameModel()
-                        .GetTowerModel(Main.selectedBaseID, (int)levelslider.CurrentValue);
+                        .GetTowerModel(Main.selectedBaseID, (int)levelslider.CurrentValue).Duplicate();
                     UpdateBottomBar();
                 }
             ));
@@ -84,7 +85,11 @@ public class UI
                     {
                         Main.selectedtower = InGame.instance.GetGameModel().GetTowerModel(Main.selectedBaseID,
                             (int)Pathsliders[0].CurrentValue, (int)Pathsliders[1].CurrentValue,
-                            (int)Pathsliders[2].CurrentValue);
+                            (int)Pathsliders[2].CurrentValue)?.Duplicate();
+                        
+                        if (Main.HasPathsPlusPlus)
+                            ApplyPathsPlusPlusSliders(Main.selectedtower);
+                        
                         UpdateBottomBar();
                     }
                 ));
@@ -97,14 +102,16 @@ public class UI
         pathselect.ScrollRect.enabled = false;
     }
 
-    public static void ApplyPathPlusPlus(PathPlusPlus path, int tier, ref TowerModel tower)
+    public static void ApplyPathPlusPlus(PathPlusPlus path, int tier, TowerModel? tower)
     {
-        var list = tower.appliedUpgrades.ToList();
-        foreach (var pathPlusPlus in GetContent<PathPlusPlus>().SelectMany(p=> p.Upgrades))
+        if (!Main.HasPathsPlusPlus)
+            return;
+
+        if (tower == null)
         {
-            list.RemoveAll(p => p == pathPlusPlus.Id);
+            return;
         }
-        tower.appliedUpgrades = list.ToArray();
+        var list = tower.appliedUpgrades.ToList();
         
         tower.tier = Math.Max(tower.tier, tier);
         for (var i = 0; i < tier; i++)
@@ -117,11 +124,13 @@ public class UI
                 tower.portrait = upgrade.PortraitReference;
             }
             
-            if (!tower.appliedUpgrades.Contains(upgrade.Id))
+            if (!list.Contains(upgrade.Id))
             {
-                tower.appliedUpgrades = tower.appliedUpgrades.AddTo(upgrade.Id);
+                list.Add(upgrade.Id);
             }
-        }
+        }      
+        
+        tower.appliedUpgrades = list.ToArray();
     }
 
 
@@ -159,28 +168,44 @@ public class UI
             Pathsplusplussliders.Clear();
         }
     }
+    
+    public static void ApplyPathsPlusPlusSliders(TowerModel? tower)
+    {
+        if (!Main.HasPathsPlusPlus) return;
+        if (tower == null) return;
+        foreach (var path in GetContent<PathPlusPlus>().Where(p => p.Tower == tower.baseId))
+        {
+            if (Pathsplusplussliders.All(p => p.Value.name.Split(':')[1] != path.Id)) continue;
+            ApplyPathPlusPlus(path, (int)Pathsplusplussliders.First(p => p.Value.name.Split(':')[1] == path.Id).Value.CurrentValue, tower);
+        }
+    }
 
     public static void GeneratePathsPlusPlusSliders(string baseId)
     {
         if (!Main.HasPathsPlusPlus) return;
         
         DestroyPathsPlusPlusSliders();
-
+        
+        if(GetContent<PathPlusPlus>().All(p => p.Tower != baseId))
+            return;
+        
         foreach (var path in GetContent<PathPlusPlus>().Where(p => p.Tower == baseId))
         {
             var i = path.Path + 1;
             var currentpath = pathselect.AddPanel(new Info($"Path{i}", 290, 300), VanillaSprites.BrownInsertPanel);
             currentpath.AddText(new Info($"Path{i}Text", 290, 100, new Vector2(.5f, .85f)), $"Path {i}", 50f);
 
-            var slider = currentpath.AddSlider(new Info($"Path{i}Input", 180, 60, new Vector2(.5f, .35f)), 0, 0, 5,
+            var slider = currentpath.AddSlider(new Info($"Path{i}Input:{path.Id}", 180, 60, new Vector2(.5f, .35f)), 0, 0, 5,
                 1,
                 new Vector2(85, 85), new Action<float>(
-                    tier =>
+                    _ =>
                     {
                         Main.selectedtower = InGame.instance.GetGameModel().GetTowerModel(Main.selectedBaseID,
                             (int)Pathsliders[0].CurrentValue, (int)Pathsliders[1].CurrentValue,
-                            (int)Pathsliders[2].CurrentValue);
-                        ApplyPathPlusPlus(path,(int)tier, ref Main.selectedtower);
+                            (int)Pathsliders[2].CurrentValue)?.Duplicate();
+                        
+                        ApplyPathsPlusPlusSliders(Main.selectedtower);
+                        
                         UpdateBottomBar();
                     }
                 ));
@@ -188,10 +213,9 @@ public class UI
             Object.Destroy(slider.DefaultNotch.gameObject);
             pathselect.AddScrollContent(currentpath);
             Pathsplusplussliders[i] = slider;
-                
-            pathselect.ScrollRect.enabled = true;
-            pathselect.ScrollRect.horizontalNormalizedPosition = 0f;
         }
+        pathselect.ScrollRect.enabled = true;
+        pathselect.ScrollRect.horizontalNormalizedPosition = 0f;
     }
 
     public static void CreateTowerSetButton(string name, string icon, string background,
@@ -207,10 +231,9 @@ public class UI
         towersetselect.AddScrollContent(towersetpanel);
 
         var towersinset = new List<ModHelperButton>();
-
+        
         if (modtowerset != null)
-            foreach (var tower in InGame.instance.GetGameModel().towerSet.Select(model => model.GetTower())
-                         .Where(tower => tower.GetModTower()?.GetPropertyValue("ModTowerSet") == modtowerset))
+            foreach (var tower in InGame.instance.GetGameModel().towerSet.Select(model => model.GetTower()).Where(tower => tower.GetModTower()?.GetPropertyValue("ModTowerSet") == modtowerset))
             {
                 var towerpanel = towersetpanel.AddButton(new Info(tower.name, width, 290),
                     background, new Action(() =>
@@ -240,8 +263,9 @@ public class UI
 
                         Main.selectedtower = InGame.instance.GetGameModel().GetTowerModel(Main.selectedBaseID,
                             (int)Pathsliders[0].CurrentValue, (int)Pathsliders[1].CurrentValue,
-                            (int)Pathsliders[2].CurrentValue);
-
+                            (int)Pathsliders[2].CurrentValue)?.Duplicate();
+                        
+                        ApplyPathsPlusPlusSliders(Main.selectedtower);
 
                         UpdateBottomBar();
                         UnlockInputFields();
@@ -294,7 +318,7 @@ public class UI
                         if (towerSet == TowerSet.Hero)
                         {
                             Main.selectedtower = InGame.instance.GetGameModel()
-                                .GetTowerModel(tower.baseId, (int)levelslider.CurrentValue);
+                                .GetTowerModel(tower.baseId, (int)levelslider.CurrentValue)?.Duplicate();
                             pathselect.SetActive(false);
                             levelselect.SetActive(true);
                         }
@@ -304,7 +328,10 @@ public class UI
                             pathselect.SetActive(true);
                             Main.selectedtower = InGame.instance.GetGameModel().GetTowerModel(tower.baseId,
                                 (int)Pathsliders[0].CurrentValue, (int)Pathsliders[1].CurrentValue,
-                                (int)Pathsliders[2].CurrentValue);
+                                (int)Pathsliders[2].CurrentValue)?.Duplicate();
+                            
+                            if (Main.HasPathsPlusPlus)
+                                ApplyPathsPlusPlusSliders(Main.selectedtower);
                         }
 
                         towersetpanel.transform.parent.FindChild(tower.name).FindChild("TowerSelected").gameObject
@@ -349,7 +376,6 @@ public class UI
     
     public static void UpdateBottomBar()
     {
-        
         if (Main.selectedtower == null || !ValidTiers(Main.selectedtower.tiers.Concat(Pathsplusplussliders.Values.Select(slider => (int)slider.CurrentValue)).ToList()))
         {
             invalidtext.gameObject.SetActive(true);
@@ -361,12 +387,7 @@ public class UI
             mergetext.Text.color = mergebutton.Button.colors.disabledColor;
             return;
         }
-        
-        if (Pathsplusplussliders.Values.All(x => x.CurrentValue == 0) && Main.selectedtower.tiers.All(x => x == 0))
-        {
-            Main.selectedtower.portrait = CreateSpriteReference(Game.instance.model.GetTower(Main.selectedtower.baseId).portrait.guidRef);
-        }
-        
+
         invalidtext.gameObject.SetActive(false);
         cost.gameObject.SetActive(true);
         mergebutton.Button.interactable = true;

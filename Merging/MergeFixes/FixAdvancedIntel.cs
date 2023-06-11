@@ -4,14 +4,14 @@ namespace OmegaCrosspathing.Merging.MergeFixes;
 
 public class FixAdvancedIntel : PostMergeFix
 {
-    public override void Apply(TowerModel model)
+    public override void Apply(TowerModel tower)
     {
-        if (model.appliedUpgrades.Contains(UpgradeType.AdvancedIntel))
+        //if (tower.appliedUpgrades.Contains(UpgradeType.AdvancedIntel))
         {
-            model.GetDescendants<TargetFirstSharedRangeModel>().ForEach(m => m.isSharedRangeEnabled = true);
-            model.GetDescendants<TargetLastSharedRangeModel>().ForEach(m => m.isSharedRangeEnabled = true);
-            model.GetDescendants<TargetCloseSharedRangeModel>().ForEach(m => m.isSharedRangeEnabled = true);
-            model.GetDescendants<TargetStrongSharedRangeModel>().ForEach(m => m.isSharedRangeEnabled = true);
+            tower.GetDescendants<TargetFirstSharedRangeModel>().ForEach(m => m.isSharedRangeEnabled = true);
+            tower.GetDescendants<TargetLastSharedRangeModel>().ForEach(m => m.isSharedRangeEnabled = true);
+            tower.GetDescendants<TargetCloseSharedRangeModel>().ForEach(m => m.isSharedRangeEnabled = true);
+            tower.GetDescendants<TargetStrongSharedRangeModel>().ForEach(m => m.isSharedRangeEnabled = true);
         }
     }
 }

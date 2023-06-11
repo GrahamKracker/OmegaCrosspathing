@@ -4,17 +4,17 @@ namespace OmegaCrosspathing.Merging.MergeFixes;
 
 public class FixAbilities : PostMergeFix
 {
-    public override void Apply(TowerModel model)
+    public override void Apply(TowerModel tower)
     {
-        foreach (var ability in model.GetAbilities().Where(abilityModel => abilityModel.displayName is "Supply Drop" or "Bomb Blitz"))
+        foreach (var ability in tower.GetAbilities().Where(abilityModel => abilityModel.displayName is "Supply Drop" or "Bomb Blitz"))
         {
             var activateAttackModel = ability.GetBehavior<ActivateAttackModel>();
             activateAttackModel.isOneShot = true;
         }
 
-        if (model.appliedUpgrades.Contains(UpgradeType.EliteSniper))
+        if (tower.appliedUpgrades.Contains(UpgradeType.EliteSniper))
         {
-            model.RemoveBehavior<TargetSupplierSupportModel>();
+            tower.RemoveBehavior<TargetSupplierSupportModel>();
         }
     }
 }

@@ -2,9 +2,9 @@
 
 public class FixBehaviorNames : PostMergeFix
 {
-    public override void Apply(TowerModel model)
+    public override void Apply(TowerModel tower)
     {
-        var behaviors = model.behaviors.ToList();
+        var behaviors = tower.behaviors.ToList();
         for (var i = 0; i < behaviors.Count; i++)
         {
             var behavior = behaviors[i];

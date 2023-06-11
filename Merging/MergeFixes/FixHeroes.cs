@@ -2,21 +2,21 @@
 
 public class FixHeroes : PostMergeFix
 {
-    public override void Apply(TowerModel model)
+    public override void Apply(TowerModel tower)
     {
-        foreach (var heroModel in model.GetBehaviors<HeroModel>())
+        foreach (var heroModel in tower.GetBehaviors<HeroModel>())
         {
-            model.RemoveBehavior(heroModel);
+            tower.RemoveBehavior(heroModel);
         }
         
-        foreach (var heroXpPerRoundModel in model.GetBehaviors<HeroXpPerRoundModel>())
+        foreach (var heroXpPerRoundModel in tower.GetBehaviors<HeroXpPerRoundModel>())
         {
-            model.RemoveBehavior(heroXpPerRoundModel);
+            tower.RemoveBehavior(heroXpPerRoundModel);
         }
         
-        foreach (var churchillBaseRotationModel in model.GetBehaviors<ChurchillBaseRotationModel>())
+        foreach (var churchillBaseRotationModel in tower.GetBehaviors<ChurchillBaseRotationModel>())
         {
-            model.RemoveBehavior(churchillBaseRotationModel);
+            tower.RemoveBehavior(churchillBaseRotationModel);
         }
     }
 }

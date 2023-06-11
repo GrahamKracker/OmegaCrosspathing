@@ -7,11 +7,10 @@ public abstract class PostMergeFix : ModContent
     public override int RegisterPerFrame => 999;
     public sealed override void Register(){}
 
-    public virtual void Apply(TowerModel model)
+    public virtual void Apply(TowerModel tower)
     {
     }
-
-    public virtual void Apply(TowerModel model, TowerModel second)
+    public virtual void Apply(TowerModel first, TowerModel second)
     {
     }
 }

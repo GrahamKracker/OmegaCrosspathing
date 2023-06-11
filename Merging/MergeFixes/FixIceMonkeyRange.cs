@@ -2,11 +2,11 @@
 
 public class FixIceMonkeyRange : PostMergeFix
 {
-    public override void Apply(TowerModel model)
+    public override void Apply(TowerModel tower)
     {
-        if (model.GetDescendant<SlowBloonsZoneModel>().IsType<SlowBloonsZoneModel>(out var slow))
+        foreach (var slow in tower.GetDescendants<SlowBloonsZoneModel>().ToList())
         {
-            slow.zoneRadius = model.range + 5;
+            slow.zoneRadius = tower.range + 5;
         }
     }
 }
