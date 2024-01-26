@@ -7,6 +7,7 @@ using Il2CppAssets.Scripts.Data;
 using Il2CppAssets.Scripts.Models.TowerSets;
 using Il2CppAssets.Scripts.Unity;
 using Il2CppAssets.Scripts.Unity.UI_New.InGame;
+using Il2CppAssets.Scripts.Utils;
 using PathsPlusPlus;
 using UnityEngine;
 using UnityEngine.UI;
@@ -17,7 +18,8 @@ namespace OmegaCrosspathing;
 
 public class UI
 {
-    public static readonly Dictionary<TowerSet, string> BackgroundSprites = new()
+    //todo add a menu that shows all past upgrades, and be able to remove them from the tower
+    private static readonly Dictionary<TowerSet, string> BackgroundSprites = new()
     {
         { TowerSet.Primary, GameData._instance.towerBackgroundSprites.primarySprite.guidRef },
         { TowerSet.Military, GameData._instance.towerBackgroundSprites.militarySprite.guidRef },
@@ -38,14 +40,13 @@ public class UI
     public static ModHelperPanel levelselect;
     public static ModHelperSlider levelslider;
     public static ModHelperPanel OCTogglePanel;
-
     public static readonly Dictionary<string, List<ModHelperButton>> TowerButtonsBySet = new();
     public static readonly Dictionary<ModHelperButton, ModHelperImage> SelectedImages = new();
     
     public static readonly ModHelperSlider[] Pathsliders = new ModHelperSlider[3];
     public static readonly Dictionary<int, ModHelperSlider> Pathsplusplussliders = new();
-    
-    public static bool ValidTiers(IReadOnlyCollection<int> tiers) =>
+
+    private static bool ValidTiers(IReadOnlyCollection<int> tiers) =>
         ModHelper.HasMod("UltimateCrosspathing") || tiers.Count(i => i > 2) <= 1 && tiers.Count(i => i > 0) <= 2;
     
     public static void SetUpLevelInput()
@@ -65,8 +66,9 @@ public class UI
             ));
         Object.Destroy(levelslider.DefaultNotch.gameObject);
 
-        levelslider.Label.transform.localScale = new Vector3(2.45f, 1, 1);
-        levelslider.Label.transform.parent.localScale = new Vector3(.35f, 1, 1);
+        var transform = levelslider.Label.transform;
+        transform.localScale = new Vector3(2.45f, 1, 1);
+        transform.parent.localScale = new Vector3(.35f, 1, 1);
 
         levelselect.SetActive(false);
     }
@@ -119,9 +121,9 @@ public class UI
             var upgrade = path.Upgrades[i];
             upgrade.ApplyUpgrade(tower);
             upgrade.ApplyUpgrade(tower, tier);
-            if (upgrade.IsHighestUpgrade(tower))
+            if (upgrade.IsHighestUpgrade(tower) && upgrade.PortraitReference is not null)
             {
-                tower.portrait = upgrade.PortraitReference;
+                tower.portrait = new SpriteReference{guidRef = upgrade.PortraitReference.guidRef};
             }
             
             if (!list.Contains(upgrade.Id))

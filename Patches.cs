@@ -1,7 +1,6 @@
 ﻿using System;
 using BTD_Mod_Helper.Api;
 using BTD_Mod_Helper.Api.Components;
-using BTD_Mod_Helper.Api.Helpers;
 using Il2CppAssets.Scripts.Models;
 using Il2CppAssets.Scripts.Simulation.Objects;
 using Il2CppAssets.Scripts.Simulation.Towers;
@@ -132,6 +131,7 @@ public partial class Main
 
         pathselect = _mainpanel.AddScrollPanel(new Info("PathSelect",
             rect.width, rect.height / 3), RectTransform.Axis.Horizontal, "", 15f, 0);
+        
         pathselect.Mask.showMaskGraphic = false;
 
         levelselect = _mainpanel.AddPanel(new Info("LevelSelect",
@@ -284,7 +284,7 @@ public partial class Main
                     .Duplicate();
             }
 
-            Algorithm.Merge(tower, towerToMerge);            
+            Algorithm.Merge(tower, towerToMerge);
             //GameModelExporter.Export(tower, "selected_tower.json");
         }
 

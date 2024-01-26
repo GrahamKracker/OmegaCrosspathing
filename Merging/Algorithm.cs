@@ -14,6 +14,7 @@ using Il2CppInterop.Runtime.InteropTypes.Arrays;
 using Il2CppSystem;
 using Il2CppSystem.Reflection;
 using OmegaCrosspathing.Merging.MergeFixes;
+using static OmegaCrosspathing.Merging.Logger;
 
 namespace OmegaCrosspathing.Merging;
 
@@ -44,7 +45,9 @@ public static class Algorithm
         {
             first.RemoveChildDependant(child);
         }
+        
         first.behaviors = MergeBehaviors(first.behaviors, second.behaviors);
+        
         foreach (var child in first.behaviors)
         {
             first.AddChildDependant(child);
@@ -65,8 +68,8 @@ public static class Algorithm
         }
     }
 
-    private static readonly HashSet<string> DontMerge = new()
-    {
+    private static readonly HashSet<string> DontMerge =
+    [
         "animation",
         "offsetX",
         "offsetY",
@@ -77,7 +80,7 @@ public static class Algorithm
         "rateFrames",
         "isPowerTower",
         "isGeraldoItem"
-    };
+    ];
 
     private static readonly Dictionary<Tuple<string, Type>, bool> BoolOverrides = new()
     {
@@ -90,8 +93,9 @@ public static class Algorithm
     {
         var firstBehaviors = first.ToList();
 
-        foreach (var secondbehavior in second.Where(x => firstBehaviors.FirstOrDefault(y => IsSameModel(y, x)) is not null))
+        foreach (var secondbehavior in second.Where(x => firstBehaviors.Find(y => IsSameModel(y, x)) is not null))
         {
+            Log("Merging same " + secondbehavior.name + " of type " + secondbehavior.GetType().FullName);
             var firstBehavior = firstBehaviors.First(x => IsSameModel(x, secondbehavior));
             foreach (var field in secondbehavior.GetIl2CppType().GetFields().Where(x=> !DontMerge.Any(dontmerge=> x.Name.Contains(dontmerge))))
             {
@@ -104,9 +108,9 @@ public static class Algorithm
             }
         }
         
-        foreach (var behavior in second.Where(x => firstBehaviors.FirstOrDefault(y => IsSameModel(y, x)) is null))
+        foreach (var behavior in second.Where(x => firstBehaviors.Find(y => IsSameModel(y, x)) is null))
         {
-            //MelonLogger.Msg("Adding behavior: " + behavior.name + " as " + behavior.GetIl2CppType().FullName);
+            Log("Adding " + behavior.name + " of type " + behavior.GetType().FullName);
             firstBehaviors.Add(behavior);
         }
         
@@ -119,8 +123,10 @@ public static class Algorithm
         return ty.IsAssignableFrom(typ);
     }
 
-    private static void MergeTypes(Type memberType, MemberInfo member, Object firstBehavior, Object secondbehavior)
+    private static void MergeTypes(Type? memberType, MemberInfo member, Object firstBehavior, Object secondbehavior)
     {
+        Log("Merging " + member.Name + " of type " + memberType?.FullName);
+
         switch (memberType)
         {
             case not null when memberType.IsType<float>():
@@ -141,7 +147,7 @@ public static class Algorithm
             case not null when memberType.IsType<bool>():
                 var firstBool = member.GetValue(firstBehavior).Unbox<bool>();
                 var secondBool = member.GetValue(secondbehavior).Unbox<bool>();
-                foreach (var ((name, type), value) in BoolOverrides)
+                foreach (((string? name, var type), bool value) in BoolOverrides)
                 {
                     if (member.Name.Contains(name))
                     {
@@ -157,7 +163,6 @@ public static class Algorithm
                         break;
                     }
                 }
-
                 break;
             case not null when memberType.IsType<Il2CppReferenceArray<Model>>():
             {
@@ -179,10 +184,37 @@ public static class Algorithm
                 member.SetValue(firstBehavior, result);
                 break;
             }
+            //todo maybe merge models?
+            /*case not null when memberType.IsType<Model>():
+            {           
+                Log("Merging model " + member.Name + " of type " + memberType.FullName);
+                
+                var firstModel = member.GetValue(firstBehavior);
+                var secondModel = member.GetValue(secondbehavior);
+                
+                foreach (var field in memberType.GetFields().Where(x=> !DontMerge.Any(dontmerge=> x.Name.Contains(dontmerge))))
+                {
+                    MergeTypes(field.FieldType, field, firstBehavior, secondbehavior);
+                }
+
+                foreach (var property in memberType.GetProperties().Where(property => property.CanWrite && !DontMerge.Any(dontmerge => property.Name.Contains(dontmerge) && property.Name.ToUpper()[0] != property.Name[0])))
+                {
+                    MergeTypes(property.PropertyType, property, firstBehavior, secondbehavior);
+                }
+                
+                
+                break;
+            }*/
             case not null when memberType.IsType<BloonProperties>():
             {
                 var result = (int)(member.GetValue(firstBehavior).Unbox<BloonProperties>() & member.GetValue(secondbehavior).Unbox<BloonProperties>());
                 member.SetValue(firstBehavior, result.ToIl2Cpp());
+                break;
+            }
+            case not null when memberType.IsType<DisplayCategory>():
+            {
+                var result = (ushort)(member.GetValue(firstBehavior).Unbox<DisplayCategory>() | member.GetValue(secondbehavior).Unbox<DisplayCategory>());
+                member.SetValue(firstBehavior, (Object) result);
                 break;
             }
         }
@@ -219,28 +251,44 @@ public static class Algorithm
         
         if (first.IsType<ProjectileModel>(out var firstProjectile) && second.IsType<ProjectileModel>(out var secondProjectile))
         {
-            return firstProjectile.id == secondProjectile.id;
+            return firstProjectile.id == secondProjectile.id || firstProjectile.display?.guidRef == secondProjectile.display?.guidRef;
         }
+        
+        if(first.name.Contains("Create") && second.name.Contains("Create") && first.name.Contains("On") && second.name.Contains("On") && first.GetIl2CppType().Name == second.GetIl2CppType().Name)
+            return true;
         
         if (first.IsType<AttackModel>(out var firstAttack) && second.IsType<AttackModel>(out var secondAttack))
         {
-            var leftDisplay = firstAttack.GetBehavior<DisplayModel>();
-            var rightDisplay = secondAttack.GetBehavior<DisplayModel>();
-            if (leftDisplay != null && rightDisplay != null)
-            {
-                if (leftDisplay.display != rightDisplay.display)
-                {
-                    return false;
-                }
-            }
-            else if (leftDisplay == null && rightDisplay == null)
+            var firstWeapon = firstAttack.weapons.FirstOrDefault();
+            var secondWeapon = secondAttack.weapons.FirstOrDefault();
+            if (firstWeapon == null || secondWeapon == null)
             {
                 return false;
             }
+            if (firstWeapon.projectile.id == secondWeapon.projectile.id)
+            {
+                return true;
+            }
+            
+            var leftDisplay = firstAttack.GetBehavior<DisplayModel>();
+            var rightDisplay = secondAttack.GetBehavior<DisplayModel>();
+            if (leftDisplay == null && rightDisplay != null)
+            {
+                return false;
+            }
+            if (leftDisplay != null && rightDisplay == null)
+            {
+                return false;
+            }
+            if (leftDisplay == null && rightDisplay == null)
+            {
+                return firstAttack.behaviors.Count == secondAttack.behaviors.Count;
+            }
+            return leftDisplay.display.guidRef == rightDisplay.display.guidRef;
         }
         
         
-        return first.name == second.name && first.GetIl2CppType().FullName == second.GetIl2CppType().FullName;
+        return first.name == second.name && first.GetIl2CppType().Name == second.GetIl2CppType().Name;
     }
 
     private static float Average(float? first, float? second)
@@ -253,5 +301,13 @@ public static class Algorithm
             return 0;
 
         return (first!.Value + second!.Value) / 2;
+    }
+}
+
+public static class Logger
+{
+    public static void Log(string message)
+    {
+        MelonLogger.Msg(message);
     }
 }
