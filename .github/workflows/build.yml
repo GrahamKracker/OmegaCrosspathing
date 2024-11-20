@@ -18,8 +18,8 @@ env:
 
 jobs:
   build:
-    permissions:
-      contents: write
+    permissions: write-all
+    
     runs-on: ubuntu-latest
 
     steps:
@@ -27,7 +27,7 @@ jobs:
         uses: actions/checkout@master
         with:
           path: ${{ env.PROJECT_NAME }}
-
+    
 
       - name: Download Latest MelonLoader
         if: env.MELONLOADER_BRANCH == ''
@@ -55,7 +55,16 @@ jobs:
           name: MelonLoader.Linux.x64.CI.Release
           repo: LavaGang/MelonLoader
           path: ${{ env.BLOONSTD6 }}
-
+          
+      - name: Download PathsPlusPlus
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          workflow: build.yml
+          branch: main
+          name: PathsPlusPlus.dll
+          repo: doombubbles/paths-plus-plus
+          path: ${{ env.BLOONSTD6 }}/Mods/
 
       - name: Clone Dependencies Repo
         uses: actions/checkout@master
@@ -90,7 +99,7 @@ jobs:
           repo: gurrenm3/BTD-Mod-Helper
           path: ${{ env.BLOONSTD6 }}/Mods/
 
-
+      
       - name: Download btd6.targets
         shell: bash
         run: |
@@ -99,20 +108,11 @@ jobs:
           fi
           wget https://raw.githubusercontent.com/gurrenm3/BTD-Mod-Helper/master/BloonsTD6%20Mod%20Helper/btd6.targets
 
-      - name: Download PathsPlusPlus
-        uses: dawidd6/action-download-artifact@v2
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          workflow: build.yml
-          branch: main
-          name: PathsPlusPlus.dll
-          repo: doombubbles/paths-plus-plus
-          path: ${{ env.BLOONSTD6 }}/Mods/
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v2
+        uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 6.0.x # net6 can still build older as well
+          dotnet-version: 8.0.x
 
 
       - name: Build
@@ -120,7 +120,7 @@ jobs:
 
 
       - name: Upload Mod DLL
-        uses: actions/upload-artifact@v2.2.4
+        uses: actions/upload-artifact@v3
         with:
           name: ${{ env.PROJECT_NAME }}.dll
           path: ${{ env.BLOONSTD6 }}/Mods/${{ env.PROJECT_NAME }}.dll
