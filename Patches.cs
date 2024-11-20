@@ -35,7 +35,7 @@ public partial class Main
 
             OCTogglePanel.gameObject.SetActive(true);
             
-            if (__instance.selectedTower.owner != InGame.instance.UnityToSimulation.MyPlayerNumber)
+            if (__instance.selectedTower.owner != InGame.instance.GetUnityToSimulation().MyPlayerNumber)
             {
                 _mainpanel.gameObject.SetActive(false);
                 OCTogglePanel.gameObject.SetActive(false);
@@ -198,7 +198,7 @@ public partial class Main
                     owner--;
 
                 InGame.instance.GetCashManager(owner).cash.Value -= totalcost;
-                InGame.instance.bridge.OnCashChangedSim();
+                InGame.instance.CashChanged();
 
                 TowerSelectionMenu.instance.selectedTower.tower.worth += totalcost;
 
@@ -251,7 +251,7 @@ public partial class Main
         {
             if (Pathsplusplussliders.All(p => p.Value.name.Split(':')[1] != path.Id)) continue;
             TowerSelectionMenu.instance.selectedTower.tower.SetTier(path.Id,
-                (int)Pathsplusplussliders.First(p => p.Value.name.Split(':')[1] == path.Id).Value.CurrentValue);
+                (int)Pathsplusplussliders.First(p => p.Value.name.Split(':')[1] == path.Id).Value.Slider.value);
         }
     }
 

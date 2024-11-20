@@ -50,6 +50,7 @@ public class UI
     
     public static void SetUpLevelInput()
     {
+        var slider = levelselect.AddSlider(new Info("Slider"), 0, 0, 5, 0.1f, new Vector2(100, 100));
         Object.Destroy(levelselect.Background);
         var level = levelselect.AddPanel(new Info("HeroLevelSelect", 290 * 3, 300), VanillaSprites.BrownInsertPanel);
         level.AddText(new Info("HeroLevelSelectText", 290 * 3, 100, new Vector2(.5f, .85f)), "Level", 50f);
@@ -59,7 +60,7 @@ public class UI
                 _ =>
                 {
                     Main.selectedtower = InGame.instance.GetGameModel()
-                        .GetTowerModel(Main.selectedBaseID, (int)levelslider.CurrentValue).Duplicate();
+                        .GetTowerModel(Main.selectedBaseID, (int)levelslider.Slider.value).Duplicate();
                     UpdateBottomBar();
                 }
             ));
@@ -84,8 +85,8 @@ public class UI
                     _ =>
                     {
                         Main.selectedtower = InGame.instance.GetGameModel().GetTowerModel(Main.selectedBaseID,
-                            (int)Pathsliders[0].CurrentValue, (int)Pathsliders[1].CurrentValue,
-                            (int)Pathsliders[2].CurrentValue)?.Duplicate();
+                            (int)Pathsliders[0].Slider.value, (int)Pathsliders[1].Slider.value,
+                            (int)Pathsliders[2].Slider.value)?.Duplicate();
                         
                         if (Main.HasPathsPlusPlus)
                             ApplyPathsPlusPlusSliders(Main.selectedtower);
@@ -176,7 +177,7 @@ public class UI
         foreach (var path in GetContent<PathPlusPlus>().Where(p => p.Tower == tower.baseId))
         {
             if (Pathsplusplussliders.All(p => p.Value.name.Split(':')[1] != path.Id)) continue;
-            ApplyPathPlusPlus(path, (int)Pathsplusplussliders.First(p => p.Value.name.Split(':')[1] == path.Id).Value.CurrentValue, tower);
+            ApplyPathPlusPlus(path, (int)Pathsplusplussliders.First(p => p.Value.name.Split(':')[1] == path.Id).Value.Slider.value, tower);
         }
     }
 
@@ -201,8 +202,8 @@ public class UI
                     _ =>
                     {
                         Main.selectedtower = InGame.instance.GetGameModel().GetTowerModel(Main.selectedBaseID,
-                            (int)Pathsliders[0].CurrentValue, (int)Pathsliders[1].CurrentValue,
-                            (int)Pathsliders[2].CurrentValue)?.Duplicate();
+                            (int)Pathsliders[0].Slider.value, (int)Pathsliders[1].Slider.value,
+                            (int)Pathsliders[2].Slider.value)?.Duplicate();
                         
                         ApplyPathsPlusPlusSliders(Main.selectedtower);
                         
@@ -262,8 +263,8 @@ public class UI
                         Main.selectedBaseID = tower.baseId;
 
                         Main.selectedtower = InGame.instance.GetGameModel().GetTowerModel(Main.selectedBaseID,
-                            (int)Pathsliders[0].CurrentValue, (int)Pathsliders[1].CurrentValue,
-                            (int)Pathsliders[2].CurrentValue)?.Duplicate();
+                            (int)Pathsliders[0].Slider.value, (int)Pathsliders[1].Slider.value,
+                            (int)Pathsliders[2].Slider.value)?.Duplicate();
                         
                         ApplyPathsPlusPlusSliders(Main.selectedtower);
 
@@ -318,7 +319,7 @@ public class UI
                         if (towerSet == TowerSet.Hero)
                         {
                             Main.selectedtower = InGame.instance.GetGameModel()
-                                .GetTowerModel(tower.baseId, (int)levelslider.CurrentValue)?.Duplicate();
+                                .GetTowerModel(tower.baseId, (int)levelslider.Slider.value)?.Duplicate();
                             pathselect.SetActive(false);
                             levelselect.SetActive(true);
                         }
@@ -327,8 +328,8 @@ public class UI
                             levelselect.SetActive(false);
                             pathselect.SetActive(true);
                             Main.selectedtower = InGame.instance.GetGameModel().GetTowerModel(tower.baseId,
-                                (int)Pathsliders[0].CurrentValue, (int)Pathsliders[1].CurrentValue,
-                                (int)Pathsliders[2].CurrentValue)?.Duplicate();
+                                (int)Pathsliders[0].Slider.value, (int)Pathsliders[1].Slider.value,
+                                (int)Pathsliders[2].Slider.value)?.Duplicate();
                             
                             if (Main.HasPathsPlusPlus)
                                 ApplyPathsPlusPlusSliders(Main.selectedtower);
@@ -376,7 +377,7 @@ public class UI
     
     public static void UpdateBottomBar()
     {
-        if (Main.selectedtower == null || !ValidTiers(Main.selectedtower.tiers.Concat(Pathsplusplussliders.Values.Select(slider => (int)slider.CurrentValue)).ToList()))
+        if (Main.selectedtower == null || !ValidTiers(Main.selectedtower.tiers.Concat(Pathsplusplussliders.Values.Select(slider => (int)slider.Slider.value)).ToList()))
         {
             invalidtext.gameObject.SetActive(true);
             towerportrait.Image.enabled = false;

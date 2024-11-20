@@ -9,6 +9,7 @@ using Il2CppAssets.Scripts.Models.Towers.Behaviors.Attack.Behaviors;
 using Il2CppAssets.Scripts.Models.Towers.Filters;
 using Il2CppAssets.Scripts.Models.Towers.Projectiles;
 using Il2CppAssets.Scripts.Models.Towers.Weapons;
+using Il2CppAssets.Scripts.Unity.UI_New.InGame;
 using Il2CppInterop.Runtime;
 using Il2CppInterop.Runtime.InteropTypes.Arrays;
 using Il2CppSystem;
@@ -115,6 +116,10 @@ public static class Algorithm
 
     private static bool IsType<T>(this Type typ)
     {
+        if (typeof(T).IsEnum)
+        {
+            return typeof(T).FullName!.EndsWith(typ.FullName!);
+        }
         var ty = Il2CppType.From(typeof(T));
         return ty.IsAssignableFrom(typ);
     }
@@ -126,7 +131,7 @@ public static class Algorithm
             case not null when memberType.IsType<float>():
                 if (secondbehavior.IsType<WeaponModel>(out var secondWeaponModel) && firstBehavior.IsType<WeaponModel>(out var firstWeaponModel) && member.Name == "rate")
                 {
-                    member.SetValue(firstBehavior,firstWeaponModel.rate * secondWeaponModel.rate);
+                    member.SetValue(firstBehavior, firstWeaponModel.rate * secondWeaponModel.rate);
                     break;
                 }
                 member.SetValue(firstBehavior,
@@ -160,31 +165,31 @@ public static class Algorithm
 
                 break;
             case not null when memberType.IsType<Il2CppReferenceArray<Model>>():
-            {
-                var secondArray = member.GetValue(secondbehavior)?.Cast<Il2CppReferenceArray<Model>>();
-                var firstArray = member.GetValue(firstBehavior)?.Cast<Il2CppReferenceArray<Model>>();
-                if (secondArray is null || firstArray is null)
                 {
-                    return;
+                    var secondArray = member.GetValue(secondbehavior)?.Cast<Il2CppReferenceArray<Model>>();
+                    var firstArray = member.GetValue(firstBehavior)?.Cast<Il2CppReferenceArray<Model>>();
+                    if (secondArray is null || firstArray is null)
+                    {
+                        return;
+                    }
+
+                    var mergedArray = MergeBehaviors(firstArray, secondArray);
+
+                    var result = Array.CreateInstance(memberType.GetElementType(), mergedArray.Count);
+                    for (var i = 0; i < mergedArray.Count; i++)
+                    {
+                        result.SetValue(mergedArray[i], i);
+                    }
+
+                    member.SetValue(firstBehavior, result);
+                    break;
                 }
-
-                var mergedArray = MergeBehaviors(firstArray, secondArray);
-
-                var result = Array.CreateInstance(memberType.GetElementType(), mergedArray.Count);
-                for (var i = 0; i < mergedArray.Count; i++)
-                {
-                    result.SetValue(mergedArray[i], i);
-                }
-
-                member.SetValue(firstBehavior, result);
-                break;
-            }
             case not null when memberType.IsType<BloonProperties>():
-            {
-                var result = (int)(member.GetValue(firstBehavior).Unbox<BloonProperties>() & member.GetValue(secondbehavior).Unbox<BloonProperties>());
-                member.SetValue(firstBehavior, result.ToIl2Cpp());
-                break;
-            }
+                {
+                    var result = (int)(member.GetValue(firstBehavior).Unbox<BloonProperties>() & member.GetValue(secondbehavior).Unbox<BloonProperties>());
+                    member.SetValue(firstBehavior, result.ToIl2Cpp());
+                    break;
+                }
         }
     }
 
