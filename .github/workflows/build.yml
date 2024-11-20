@@ -10,7 +10,7 @@ on:
 
 
 env:
-  PROJECT_NAME: StreamActions
+  PROJECT_NAME: OmegaCrosspathing
   MELONLOADER_BRANCH: alpha-development
   
   MOD_HELPER_NAME: Btd6ModHelper
@@ -27,7 +27,7 @@ jobs:
         uses: actions/checkout@master
         with:
           path: ${{ env.PROJECT_NAME }}
-
+    
 
       - name: Download Latest MelonLoader
         if: env.MELONLOADER_BRANCH == ''
@@ -55,7 +55,16 @@ jobs:
           name: MelonLoader.Linux.x64.CI.Release
           repo: LavaGang/MelonLoader
           path: ${{ env.BLOONSTD6 }}
-
+          
+      - name: Download PathsPlusPlus
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          workflow: build.yml
+          branch: main
+          name: PathsPlusPlus.dll
+          repo: doombubbles/paths-plus-plus
+          path: ${{ env.BLOONSTD6 }}/Mods/
 
       - name: Clone Dependencies Repo
         uses: actions/checkout@master
@@ -90,7 +99,7 @@ jobs:
           repo: gurrenm3/BTD-Mod-Helper
           path: ${{ env.BLOONSTD6 }}/Mods/
 
-
+      
       - name: Download btd6.targets
         shell: bash
         run: |
