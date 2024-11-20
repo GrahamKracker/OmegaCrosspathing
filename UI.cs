@@ -50,7 +50,6 @@ public class UI
     
     public static void SetUpLevelInput()
     {
-        var slider = levelselect.AddSlider(new Info("Slider"), 0, 0, 5, 0.1f, new Vector2(100, 100));
         Object.Destroy(levelselect.Background);
         var level = levelselect.AddPanel(new Info("HeroLevelSelect", 290 * 3, 300), VanillaSprites.BrownInsertPanel);
         level.AddText(new Info("HeroLevelSelectText", 290 * 3, 100, new Vector2(.5f, .85f)), "Level", 50f);
