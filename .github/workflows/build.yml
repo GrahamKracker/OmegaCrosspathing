@@ -47,7 +47,7 @@ jobs:
 
       - name: Download Specific MelonLoader
         if: env.MELONLOADER_BRANCH != ''
-        uses: dawidd6/action-download-artifact@v2
+        uses: dawidd6/action-download-artifact@v6
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           workflow: build.yml
@@ -57,7 +57,7 @@ jobs:
           path: ${{ env.BLOONSTD6 }}
           
       - name: Download PathsPlusPlus
-        uses: dawidd6/action-download-artifact@v2
+        uses: dawidd6/action-download-artifact@v6
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           workflow: build.yml
@@ -89,7 +89,7 @@ jobs:
 
 
       - name: Download Specific Mod Helper
-        uses: dawidd6/action-download-artifact@v2
+        uses: dawidd6/action-download-artifact@v6
         if: env.MOD_HELPER_BRANCH != ''
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -120,7 +120,7 @@ jobs:
 
 
       - name: Upload Mod DLL
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ env.PROJECT_NAME }}.dll
           path: ${{ env.BLOONSTD6 }}/Mods/${{ env.PROJECT_NAME }}.dll
