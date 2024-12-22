@@ -1,6 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OmegaCrosspathing", "OmegaCrosspathing.csproj", "{C2EEBAB3-94F1-44D1-88EE-FA416D0A92A3}"
+# Visual Studio Version 17
+VisualStudioVersion = 17.8.34511.84
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OmegaCrosspathing", "OmegaCrosspathing.csproj", "{6BED3813-27AD-4576-BC43-05EFE44E3187}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -8,9 +11,15 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{C2EEBAB3-94F1-44D1-88EE-FA416D0A92A3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C2EEBAB3-94F1-44D1-88EE-FA416D0A92A3}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C2EEBAB3-94F1-44D1-88EE-FA416D0A92A3}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C2EEBAB3-94F1-44D1-88EE-FA416D0A92A3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6BED3813-27AD-4576-BC43-05EFE44E3187}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6BED3813-27AD-4576-BC43-05EFE44E3187}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6BED3813-27AD-4576-BC43-05EFE44E3187}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6BED3813-27AD-4576-BC43-05EFE44E3187}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {3A015AB8-1CC4-4226-9692-812BCCEA496A}
 	EndGlobalSection
 EndGlobal
