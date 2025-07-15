@@ -197,9 +197,7 @@ public partial class Main
                 else
                     owner--;
 
-                InGame.instance.GetCashManager(owner).cash.Value -= totalcost;
-                InGame.instance.CashChanged();
-
+                InGame.instance.AddCash(-totalcost);
                 TowerSelectionMenu.instance.selectedTower.tower.worth += totalcost;
 
 
