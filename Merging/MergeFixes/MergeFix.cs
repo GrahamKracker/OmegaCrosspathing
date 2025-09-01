@@ -2,7 +2,7 @@
 
 namespace OmegaCrosspathing.Merging.MergeFixes;
 
-public abstract class PostMergeFix : ModContent
+public abstract class MergeFix : ModContent
 {
     public override int RegisterPerFrame => 999;
     public sealed override void Register(){}

@@ -4,7 +4,7 @@ using Il2CppAssets.Scripts.Models.Towers.Weapons.Behaviors;
 
 namespace OmegaCrosspathing.Merging.MergeFixes;
 
-public class FixAircraftCarriers : PostMergeFix
+public class FixAircraftCarriers : MergeFix
 {
     public override void Apply(TowerModel tower)
     {

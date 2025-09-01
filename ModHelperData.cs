@@ -4,8 +4,8 @@ public static class ModHelperData
 {
     public const string Name = "OmegaCrosspathing";
     public const string Description = "Allows you to merge towers together, should be fully compatible with ultimate crosspathing, custom towers, custom heroes, and custom towersets.";
-    public const string Version = "0.0.7";
+    public const string Version = "0.0.8";
     public const string RepoOwner = "GrahamKracker";
     public const string RepoName = "OmegaCrosspathing";
-    public const string WorksOnVersion = "47";
+    public const string WorksOnVersion = "50";
 }

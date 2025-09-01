@@ -3,7 +3,7 @@ using Il2CppAssets.Scripts.Models.Towers.Projectiles.Behaviors;
 
 namespace OmegaCrosspathing.Merging.MergeFixes;
 
-public class FixHomingProjectiles : PostMergeFix
+public class FixHomingProjectiles : MergeFix
 {
     public override void Apply(TowerModel tower)
     {

@@ -3,7 +3,7 @@ using Il2CppAssets.Scripts.Models.Towers.Behaviors.Emissions;
 
 namespace OmegaCrosspathing.Merging.MergeFixes;
 
-public class FixPlasmaBeams : PostMergeFix
+public class FixPlasmaBeams : MergeFix
 {
     public override void Apply(TowerModel tower)
     {

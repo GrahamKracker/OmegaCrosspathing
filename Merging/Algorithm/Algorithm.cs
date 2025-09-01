@@ -51,7 +51,7 @@ public static class Algorithm
             first.AddChildDependant(child);
         }
 
-        foreach (var postMergeFix in ModContent.GetContent<PostMergeFix>())
+        foreach (var postMergeFix in ModContent.GetContent<MergeFix>())
         {
             try
             {

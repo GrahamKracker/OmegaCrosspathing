@@ -1,6 +1,6 @@
 ﻿namespace OmegaCrosspathing.Merging.MergeFixes;
 
-public class FixIceMonkeyRange : PostMergeFix
+public class FixIceMonkeyRange : MergeFix
 {
     public override void Apply(TowerModel tower)
     {

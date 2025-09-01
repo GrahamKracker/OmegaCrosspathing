@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace OmegaCrosspathing.Merging.MergeFixes;
 
-public class FixSmallRanges : PostMergeFix
+public class FixSmallRanges : MergeFix
 {
     public override void Apply(TowerModel tower)
     {

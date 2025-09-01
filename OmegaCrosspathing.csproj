@@ -27,6 +27,7 @@
 
     <ItemGroup>
         <Folder Include="Assets\Portraits\" />
+        <Folder Include="Merging\Algorithm\TypeMergers\" />
     </ItemGroup>
     <Import Project="..\btd6.targets" />
 </Project>

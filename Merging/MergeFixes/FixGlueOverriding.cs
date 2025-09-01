@@ -6,7 +6,7 @@ using Il2CppAssets.Scripts.Models.Towers.Projectiles.Behaviors;
 
 namespace OmegaCrosspathing.Merging.MergeFixes;
 
-public class FixGlueOverriding : PostMergeFix
+public class FixGlueOverriding : MergeFix
 {
     public override void Apply(TowerModel tower)
     {

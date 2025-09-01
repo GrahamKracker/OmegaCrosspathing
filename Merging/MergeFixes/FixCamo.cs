@@ -4,7 +4,7 @@ using Il2CppAssets.Scripts.Models.Towers.Projectiles.Behaviors;
 
 namespace OmegaCrosspathing.Merging.MergeFixes;
 
-public class FixCamo : PostMergeFix
+public class FixCamo : MergeFix
 {
     public static void SetHitCamo(ProjectileModel projectileModel)
     {

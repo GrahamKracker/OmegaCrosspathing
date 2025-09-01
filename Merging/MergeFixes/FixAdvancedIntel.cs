@@ -2,7 +2,7 @@
 
 namespace OmegaCrosspathing.Merging.MergeFixes;
 
-public class FixAdvancedIntel : PostMergeFix
+public class FixAdvancedIntel : MergeFix
 {
     public override void Apply(TowerModel tower)
     {

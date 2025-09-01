@@ -1,6 +1,6 @@
 namespace OmegaCrosspathing.Merging.MergeFixes;
 
-public class FixHeroVoicelines : PostMergeFix
+public class FixHeroVoicelines : MergeFix
 {
     public override void Apply(TowerModel model)
     {

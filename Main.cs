@@ -14,17 +14,15 @@ namespace OmegaCrosspathing;
 [HarmonyPatch]
 public partial class Main : BloonsTD6Mod
 {
+    // ReSharper disable once MemberCanBePrivate.Global
+    // ReSharper disable once ConvertToConstant.Global
+    public static readonly string MutatorName = "OmegaCrosspathing"; //public and static so it can be used in other mods and also isnt inlined into the IL
+
     public static float totalcost;
-    
     public static bool HasPathsPlusPlus => ModHelper.HasMod("PathsPlusPlus");
 
     public static string selectedBaseID = "";
     public static TowerModel? selectedtower;
-
-    public override void OnTowerSelected(Tower tower)
-    {
-        PortraitManager.SetUpPortrait(tower.GetTowerToSim());
-    }
 
     public override void OnMainMenu()
     {
@@ -34,19 +32,19 @@ public partial class Main : BloonsTD6Mod
 
     public override void OnTowerSaved(Tower tower, TowerSaveDataModel saveData)
     {
-        var OCMutator = tower.GetMutator("OC")?.TryCast<SupportRemoveFilterOutTag.MutatorTower>();
-        if (OCMutator != null)
-            saveData.metaData["OC"] = OCMutator.removeScriptsWithSupportMutatorId;
+        var mutator = tower.GetMutator(MutatorName)?.TryCast<SupportRemoveFilterOutTag.MutatorTower>();
+        if (mutator != null)
+            saveData.metaData[MutatorName] = mutator.removeScriptsWithSupportMutatorId;
     }
 
     public override void OnTowerLoaded(Tower tower, TowerSaveDataModel saveData)
     {
-        if (!saveData.metaData.TryGetValue("OC", out var ocMutator))
+        if (!saveData.metaData.TryGetValue(MutatorName, out var mutator))
             return;
 
         if (tower.mutators != null)
-            tower.RemoveMutatorsById("OC");
+            tower.RemoveMutatorsById(MutatorName);
 
-        tower.AddMutator(new SupportRemoveFilterOutTag.MutatorTower("OC", ocMutator, null));
+        tower.AddMutator(new SupportRemoveFilterOutTag.MutatorTower(MutatorName, mutator, null));
     }
 }

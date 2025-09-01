@@ -1,6 +1,6 @@
 namespace OmegaCrosspathing.Merging.MergeFixes;
 
-public class FixAdoraSacrifice : PostMergeFix
+public class FixAdoraSacrifice : MergeFix
 {
     public override void Apply(TowerModel tower)
     {

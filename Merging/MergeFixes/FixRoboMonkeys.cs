@@ -5,7 +5,7 @@ using Il2CppAssets.Scripts.Simulation.SMath;
 
 namespace OmegaCrosspathing.Merging.MergeFixes;
 
-public class FixRoboMonkeys : PostMergeFix
+public class FixRoboMonkeys : MergeFix
 {
     public override void Apply(TowerModel tower)
     {

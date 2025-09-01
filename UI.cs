@@ -5,9 +5,7 @@ using BTD_Mod_Helper.Api.Components;
 using BTD_Mod_Helper.Api.Towers;
 using Il2CppAssets.Scripts.Data;
 using Il2CppAssets.Scripts.Models.TowerSets;
-using Il2CppAssets.Scripts.Unity;
 using Il2CppAssets.Scripts.Unity.UI_New.InGame;
-using Il2CppAssets.Scripts.Utils;
 using Il2CppNinjaKiwi.Common.ResourceUtils;
 using PathsPlusPlus;
 using UnityEngine;
@@ -19,7 +17,7 @@ namespace OmegaCrosspathing;
 
 public class UI
 {
-    //todo add a menu that shows all past upgrades, and be able to remove them from the tower
+    //todo add a menu that shows all past upgrades, and be able to remove them from the tower through "selling"
     private static readonly Dictionary<TowerSet, string> BackgroundSprites = new()
     {
         { TowerSet.Primary, GameData._instance.towerBackgroundSprites.primarySprite.guidRef },

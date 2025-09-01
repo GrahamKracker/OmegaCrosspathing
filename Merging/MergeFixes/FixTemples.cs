@@ -2,7 +2,7 @@
 
 namespace OmegaCrosspathing.Merging.MergeFixes;
 
-public class FixTemples : PostMergeFix
+public class FixTemples : MergeFix
 {
     public override void Apply(TowerModel tower)
     {

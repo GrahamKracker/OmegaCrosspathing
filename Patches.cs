@@ -153,12 +153,12 @@ public partial class Main
             {
                 if (InGame.instance.GetCash() < totalcost) return;
 
-                var OCMutator = TowerSelectionMenu.instance.selectedTower.tower.GetMutator("OC")
+                var OCMutator = TowerSelectionMenu.instance.selectedTower.tower.GetMutator(MutatorName)
                     ?.Cast<SupportRemoveFilterOutTag.MutatorTower>();
 
 
                 if (TowerSelectionMenu.instance.selectedTower.tower.mutators != null)
-                    TowerSelectionMenu.instance.selectedTower.tower.RemoveMutatorsById("OC");
+                    TowerSelectionMenu.instance.selectedTower.tower.RemoveMutatorsById(MutatorName);
 
                 var savedata = selectedtower.GetBaseId() + ":" + selectedtower.tiers[0] + "-" + selectedtower.tiers[1] +
                                "-" +
@@ -168,7 +168,7 @@ public partial class Main
                     savedata = "hero:" + selectedtower.GetBaseId() + ":" + selectedtower.tiers[0];
 
                 TowerSelectionMenu.instance.selectedTower.tower.AddMutator(
-                    new SupportRemoveFilterOutTag.MutatorTower("OC",
+                    new SupportRemoveFilterOutTag.MutatorTower(MutatorName,
                         OCMutator?.removeScriptsWithSupportMutatorId + savedata + ",",
                         null));
                 
@@ -185,7 +185,7 @@ public partial class Main
                     }
                 }
 
-                if (Main.HasPathsPlusPlus)
+                if (HasPathsPlusPlus)
                 {
                     ApplyPaths();
                 }
@@ -244,7 +244,7 @@ public partial class Main
     private static void ApplyPaths()
     {
         if (selectedtower == null) return;
-        if (!Main.HasPathsPlusPlus) return;
+        if (!HasPathsPlusPlus) return;
         foreach (var path in ModContent.GetContent<PathPlusPlus>().Where(p => p.Tower == selectedtower.baseId))
         {
             if (Pathsplusplussliders.All(p => p.Value.name.Split(':')[1] != path.Id)) continue;
@@ -260,7 +260,7 @@ public partial class Main
         Model model,
         ref bool __result)
     {
-        if (__instance.id != "OC") return true;
+        if (__instance.id != MutatorName) return true;
 
         var tower = model.Cast<TowerModel>();
 
@@ -294,6 +294,6 @@ public partial class Main
     [HarmonyPrefix]
     private static bool Tower_AddMutator(Tower __instance, BehaviorMutator mutator)
     {
-        return !(__instance.towerModel.isSubTower && mutator.id == "OC");
+        return !(__instance.towerModel.isSubTower && mutator.id == MutatorName);
     }
 }
